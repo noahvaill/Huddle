@@ -28,6 +28,20 @@ After a run, open these in a browser:
 - JUnit and overall results: `build/reports/tests/test/index.html`
 - Cucumber scenarios: `build/reports/cucumber/cucumber.html`
 
+## Continuous integration
+
+GitHub Actions runs `./gradlew build` on JDK 21 for every push and every pull request
+(workflow: `.github/workflows/build.yml`). The result shows as a check on the pull request,
+and a pull request can only be merged when the check is green.
+
+- **See why a run failed**: open the pull request, click **Details** next to the *Build and test* check,
+  and read the log of the *Build and run all tests* step.
+- **Test reports**: each run uploads the JUnit and Cucumber HTML reports as the `test-reports`
+  artifact, at the bottom of the run's summary page.
+- **Re-run**: from the run page, **Re-run jobs**, or from the *Actions* tab, *Build* → **Run workflow**.
+
+If CI fails on `main`, fixing it comes before anything else.
+
 ## Where things go
 
 | File | Location |
@@ -38,6 +52,9 @@ After a run, open these in a browser:
 | Step definitions | `src/test/java/ca/mcgill/ecse428/huddle/features/` |
 
 Tag each feature file with its story ID on the line above `Feature:` (e.g. `@ID004`).
+
+Step definition classes take `HuddleWorld` in their constructor to share state (services, time slots, messages) within a scenario.
+Steps used by more than one story (login, time slots, messages) live in `CommonStepDefinitions`; do not redefine them.
 
 Cucumber fails the build when a step has no step definition. Add a feature file in the same
 PR as its step definitions, or `./gradlew build` will fail on `main`.
