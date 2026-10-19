@@ -25,7 +25,7 @@ public class GameRequestService {
         return maxPlayers.get(sport);
     }
 
-    public GameRequest postRequest(String creator, TimeSlot slot, int groupSize, int playersNeeded) {
+    public GameRequest postRequest(User creator, TimeSlot slot, int groupSize, int playersNeeded) {
         if (!slot.available()) {
             throw new InvalidGameRequestException(InvalidGameRequestException.SLOT_NOT_AVAILABLE_MESSAGE);
         }
@@ -47,10 +47,10 @@ public class GameRequestService {
     }
 
     // A user cannot be in two open or confirmed games whose time slots overlap on the same day
-    private boolean hasOverlappingGame(String user, TimeSlot slot) {
+    private boolean hasOverlappingGame(User user, TimeSlot slot) {
         return requests.stream()
                 .filter(r -> r.getStatus() == GameRequestStatus.OPEN || r.getStatus() == GameRequestStatus.CONFIRMED)
-                .filter(r -> r.getParticipants().contains(user))
+                .filter(r -> r.hasParticipant(user))
                 .map(GameRequest::getTimeSlot)
                 .anyMatch(other -> other.date().equals(slot.date())
                         && slot.start().isBefore(other.end())

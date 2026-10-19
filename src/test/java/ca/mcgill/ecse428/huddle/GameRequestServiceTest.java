@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class GameRequestServiceTest {
 
     private static final LocalDate DAY = LocalDate.of(2026, 10, 15);
-    private static final String ALICE = "Alice Chen";
+    private static final User ALICE = new User("Alice Chen");
     private GameRequestService service;
 
     private static TimeSlot slot(String court, Sport sport, String start, String end, boolean available) {
@@ -100,7 +100,7 @@ class GameRequestServiceTest {
     @Test
     void idsIncrementInCreationOrder() {
         GameRequest first = service.postRequest(ALICE, SQUASH, 1, 1);
-        GameRequest second = service.postRequest("Bob Martin", BADMINTON, 1, 1);
+        GameRequest second = service.postRequest(new User("Bob Martin"), BADMINTON, 1, 1);
 
         assertEquals("R1", first.getId());
         assertEquals("R2", second.getId());
