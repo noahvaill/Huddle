@@ -39,6 +39,9 @@ After a run, open these in a browser:
 
 Tag each feature file with its story ID on the line above `Feature:` (e.g. `@ID004`).
 
+Step definition classes take `HuddleWorld` in their constructor to share state (services, time slots, messages) within a scenario.
+Steps used by more than one story (login, time slots, messages) live in `CommonStepDefinitions`; do not redefine them.
+
 Cucumber fails the build when a step has no step definition. Add a feature file in the same
 PR as its step definitions, or `./gradlew build` will fail on `main`.
 
