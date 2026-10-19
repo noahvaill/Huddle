@@ -24,9 +24,9 @@ class SportTest {
     @Test
     void unknownSportThrowsSportNotOffered() {
         SportNotOfferedException e =
-                assertThrows(SportNotOfferedException.class, () -> Sport.fromName("Basketball"));
+                assertThrows(SportNotOfferedException.class, () -> Sport.fromName("Curling"));
         assertEquals("Sport not offered", e.getMessage());
-        assertEquals("Basketball", e.getRequestedSport());
+        assertEquals("Curling", e.getRequestedSport());
     }
 
     @Test
@@ -37,6 +37,6 @@ class SportTest {
 
     @Test
     void offeredSportNamesListsAllSports() {
-        assertEquals(List.of("Squash", "Tennis", "Pickleball", "Badminton"), Sport.offeredSportNames());
+        assertEquals(List.of("Squash", "Tennis", "Pickleball", "Badminton", "Basketball"), Sport.offeredSportNames());
     }
 }
