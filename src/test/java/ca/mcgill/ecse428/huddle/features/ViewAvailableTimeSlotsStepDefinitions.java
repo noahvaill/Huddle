@@ -3,6 +3,7 @@ package ca.mcgill.ecse428.huddle.features;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.mcgill.ecse428.huddle.Court;
 import ca.mcgill.ecse428.huddle.Sport;
 import ca.mcgill.ecse428.huddle.SportNotOfferedException;
 import ca.mcgill.ecse428.huddle.TimeSlot;
@@ -33,8 +34,7 @@ public class ViewAvailableTimeSlotsStepDefinitions {
     public void the_following_time_slots_exist(DataTable dataTable) {
         for (Map<String, String> row : dataTable.asMaps()) {
             service.addTimeSlot(new TimeSlot(
-                    row.get("court"),
-                    Sport.fromName(row.get("sport")),
+                    new Court(row.get("court"), Sport.fromName(row.get("sport"))),
                     LocalDate.parse(row.get("date")),
                     LocalTime.parse(row.get("start")),
                     LocalTime.parse(row.get("end")),
@@ -59,7 +59,7 @@ public class ViewAvailableTimeSlotsStepDefinitions {
     public void the_following_time_slots_are_listed(DataTable dataTable) {
         List<Map<String, String>> actual = listedSlots.stream()
                 .map(s -> Map.of(
-                        "court", s.court(),
+                        "court", s.court().name(),
                         "date", s.date().toString(),
                         "start", s.start().toString(),
                         "end", s.end().toString()))

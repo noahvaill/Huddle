@@ -17,7 +17,7 @@ public class TimeSlotService {
         Sport sport = Sport.fromName(sportName);
         return timeSlots.stream()
                 .filter(s -> s.available() && s.sport() == sport && s.date().equals(date))
-                .sorted(Comparator.comparing(TimeSlot::start).thenComparing(TimeSlot::court))
+                .sorted(Comparator.comparing(TimeSlot::start).thenComparing(s -> s.court().name()))
                 .toList();
     }
 }
