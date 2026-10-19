@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class CourtTest {
 
-    private final Sport squash = new Sport("Squash");
+    private final Sport squash = Sport.SQUASH;
 
     @Test
     void nameAndSportAreStored() {

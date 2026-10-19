@@ -3,27 +3,40 @@ package ca.mcgill.ecse428.huddle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class SportTest {
 
     @Test
-    void nameIsStored() {
-        assertEquals("Squash", new Sport("Squash").name());
+    void everyOfferedSportIsFoundByItsName() {
+        for (Sport s : Sport.values()) {
+            assertEquals(s, Sport.fromName(s.getDisplayName()));
+        }
     }
 
     @Test
-    void nameIsTrimmed() {
-        assertEquals(new Sport("Squash"), new Sport("  Squash "));
+    void nameMatchIgnoresCaseAndSpaces() {
+        assertEquals(Sport.TENNIS, Sport.fromName("  tennis "));
+        assertEquals(Sport.PICKLEBALL, Sport.fromName("PICKLEBALL"));
     }
 
     @Test
-    void blankNameIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> new Sport("  "));
+    void unknownSportThrowsSportNotOffered() {
+        SportNotOfferedException e =
+                assertThrows(SportNotOfferedException.class, () -> Sport.fromName("Basketball"));
+        assertEquals("Sport not offered", e.getMessage());
+        assertEquals("Basketball", e.getRequestedSport());
     }
 
     @Test
-    void nullNameIsRejected() {
-        assertThrows(NullPointerException.class, () -> new Sport(null));
+    void nullOrBlankThrowsSportNotOffered() {
+        assertThrows(SportNotOfferedException.class, () -> Sport.fromName(null));
+        assertThrows(SportNotOfferedException.class, () -> Sport.fromName("   "));
+    }
+
+    @Test
+    void offeredSportNamesListsAllSports() {
+        assertEquals(List.of("Squash", "Tennis", "Pickleball", "Badminton"), Sport.offeredSportNames());
     }
 }
