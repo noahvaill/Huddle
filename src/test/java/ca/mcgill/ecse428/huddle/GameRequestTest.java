@@ -20,9 +20,9 @@ class GameRequestTest {
     private static final User DAN = new User("Dan Lee");
     private static final User CARLA = new User("Carla Diaz");
 
-    private static final TimeSlot SQUASH = new TimeSlot("Squash Court 1", Sport.SQUASH,
+    private static final TimeSlot SQUASH = new TimeSlot(new Court("Squash Court 1", Sport.SQUASH),
             LocalDate.of(2026, 10, 15), LocalTime.of(18, 0), LocalTime.of(18, 45), true);
-    private static final TimeSlot BASKETBALL = new TimeSlot("Basketball Court", Sport.BASKETBALL,
+    private static final TimeSlot BASKETBALL = new TimeSlot(new Court("Basketball Court", Sport.BASKETBALL),
             LocalDate.of(2026, 10, 15), LocalTime.of(19, 0), LocalTime.of(20, 0), true);
 
     // --- constructors and participant counting ---
