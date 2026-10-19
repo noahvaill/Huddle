@@ -28,6 +28,20 @@ After a run, open these in a browser:
 - JUnit and overall results: `build/reports/tests/test/index.html`
 - Cucumber scenarios: `build/reports/cucumber/cucumber.html`
 
+## Continuous integration
+
+GitHub Actions runs `./gradlew build` on JDK 21 for every push and every pull request
+(workflow: `.github/workflows/build.yml`). The result shows as a check on the pull request,
+and a pull request can only be merged when the check is green.
+
+- **See why a run failed**: open the pull request, click **Details** next to the *Build and test* check,
+  and read the log of the *Build and run all tests* step.
+- **Test reports**: each run uploads the JUnit and Cucumber HTML reports as the `test-reports`
+  artifact, at the bottom of the run's summary page.
+- **Re-run**: from the run page, **Re-run jobs**, or from the *Actions* tab, *Build* → **Run workflow**.
+
+If CI fails on `main`, fixing it comes before anything else.
+
 ## Where things go
 
 | File | Location |
