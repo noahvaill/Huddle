@@ -39,7 +39,7 @@ public class ViewAvailableTimeSlotsStepDefinitions {
     public void the_following_time_slots_are_listed(DataTable dataTable) {
         List<Map<String, String>> actual = listedSlots.stream()
                 .map(s -> Map.of(
-                        "court", s.court(),
+                        "court", s.court().name(),
                         "date", s.date().toString(),
                         "start", s.start().toString(),
                         "end", s.end().toString()))

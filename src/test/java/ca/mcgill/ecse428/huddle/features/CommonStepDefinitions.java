@@ -2,6 +2,7 @@ package ca.mcgill.ecse428.huddle.features;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import ca.mcgill.ecse428.huddle.Court;
 import ca.mcgill.ecse428.huddle.Sport;
 import ca.mcgill.ecse428.huddle.TimeSlot;
 import io.cucumber.datatable.DataTable;
@@ -29,8 +30,7 @@ public class CommonStepDefinitions {
     public void the_following_time_slots_exist(DataTable dataTable) {
         for (Map<String, String> row : dataTable.asMaps()) {
             TimeSlot slot = new TimeSlot(
-                    row.get("court"),
-                    Sport.fromName(row.get("sport")),
+                    new Court(row.get("court"), Sport.fromName(row.get("sport"))),
                     LocalDate.parse(row.get("date")),
                     LocalTime.parse(row.get("start")),
                     LocalTime.parse(row.get("end")),

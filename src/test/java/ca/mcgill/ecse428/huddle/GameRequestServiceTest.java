@@ -15,7 +15,7 @@ class GameRequestServiceTest {
     private GameRequestService service;
 
     private static TimeSlot slot(String court, Sport sport, String start, String end, boolean available) {
-        return new TimeSlot(court, sport, DAY, LocalTime.parse(start), LocalTime.parse(end), available);
+        return new TimeSlot(new Court(court, sport), DAY, LocalTime.parse(start), LocalTime.parse(end), available);
     }
 
     private static final TimeSlot SQUASH = slot("Squash Court 1", Sport.SQUASH, "18:00", "18:45", true);
