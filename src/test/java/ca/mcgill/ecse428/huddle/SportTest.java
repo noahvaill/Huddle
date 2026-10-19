@@ -37,6 +37,6 @@ class SportTest {
 
     @Test
     void offeredSportNamesListsAllSports() {
-        assertEquals(List.of("Squash", "Tennis", "Pickleball"), Sport.offeredSportNames());
+        assertEquals(List.of("Squash", "Tennis", "Pickleball", "Badminton"), Sport.offeredSportNames());
     }
 }

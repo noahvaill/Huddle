@@ -5,7 +5,7 @@ import java.util.List;
 
 
 public enum Sport {
-    SQUASH("Squash"), TENNIS("Tennis"), PICKLEBALL("Pickleball");
+    SQUASH("Squash"), TENNIS("Tennis"), PICKLEBALL("Pickleball"), BADMINTON("Badminton");
 
     private final String displayName;
     Sport(String displayName) { this.displayName = displayName; }
