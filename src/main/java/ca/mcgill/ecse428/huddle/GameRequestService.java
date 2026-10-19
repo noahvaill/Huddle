@@ -11,6 +11,7 @@ public class GameRequestService {
 
     public static final String POSTED_MESSAGE = "Game request posted";
     public static final String JOINED_MESSAGE = "You have joined the game";
+    public static final String NO_OPEN_REQUESTS_MESSAGE = "No open game requests";
     private final Map<Sport, Integer> maxPlayers = new EnumMap<>(Map.of(
             Sport.SQUASH, 2,
             Sport.TENNIS, 2,
@@ -104,6 +105,14 @@ public class GameRequestService {
 
     public List<GameRequest> getRequests() {
         return List.copyOf(requests);
+    }
+
+    public List<GameRequest> getOpenGameRequests(User currentUser, String sportName) {
+        Sport sport = Sport.fromName(sportName);
+        Objects.requireNonNull(currentUser, "User is required");
+        return requests.stream()
+                .filter(r -> r.getSport() == sport && r.isOpen() && !r.isCreatedBy(currentUser))
+                .toList();
     }
 
     public Optional<GameRequest> findById(String id) {
