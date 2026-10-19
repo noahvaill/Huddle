@@ -8,6 +8,7 @@ import ca.mcgill.ecse428.huddle.GameRequestService;
 import ca.mcgill.ecse428.huddle.GameRequestStatus;
 import ca.mcgill.ecse428.huddle.InvalidGameRequestException;
 import ca.mcgill.ecse428.huddle.Sport;
+import ca.mcgill.ecse428.huddle.User;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -24,7 +25,7 @@ public class PostOpenGameRequestStepDefinitions {
 
     private void postRequest(String userName, String slotId, int groupSize, int playersNeeded) {
         try {
-            world.gameRequestService.postRequest(userName, world.timeSlotsById.get(slotId), groupSize, playersNeeded);
+            world.gameRequestService.postRequest(new User(userName), world.timeSlotsById.get(slotId), groupSize, playersNeeded);
             world.message = GameRequestService.POSTED_MESSAGE;
         } catch (InvalidGameRequestException e) {
             world.errorMessage = e.getMessage();
@@ -41,7 +42,7 @@ public class PostOpenGameRequestStepDefinitions {
 
     @Given("{string} has an open game request for time slot {string}")
     public void has_an_open_game_request_for_time_slot(String userName, String slotId) {
-        world.gameRequestService.postRequest(userName, world.timeSlotsById.get(slotId), 1, 1);
+        world.gameRequestService.postRequest(new User(userName), world.timeSlotsById.get(slotId), 1, 1);
     }
 
     @When("{string} posts an open game request for time slot {string} needing {int} more player(s)")
@@ -57,7 +58,7 @@ public class PostOpenGameRequestStepDefinitions {
     @Then("an open game request exists for time slot {string} created by {string} with {int} spot(s) remaining")
     public void an_open_game_request_exists(String slotId, String creator, int spotsRemaining) {
         GameRequest request = world.gameRequestService.findByTimeSlot(world.timeSlotsById.get(slotId)).orElseThrow();
-        assertEquals(creator, request.getCreator());
+        assertEquals(new User(creator), request.getCreator());
         assertEquals(spotsRemaining, request.getSpotsRemaining());
         assertEquals(GameRequestStatus.OPEN, request.getStatus());
     }
