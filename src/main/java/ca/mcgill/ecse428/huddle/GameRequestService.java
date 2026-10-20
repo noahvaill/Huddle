@@ -11,6 +11,7 @@ public class GameRequestService {
 
     public static final String POSTED_MESSAGE = "Game request posted";
     public static final String JOINED_MESSAGE = "You have joined the game";
+    public static final String CONFIRMED_MESSAGE_FORMAT = "Game confirmed on %s on %s at %s";
     private final Map<Sport, Integer> maxPlayers = new EnumMap<>(Map.of(
             Sport.SQUASH, 2,
             Sport.TENNIS, 2,
@@ -57,7 +58,10 @@ public class GameRequestService {
         requests.add(request);
     }
 
-    /** Adds user to the request's participants and takes one spot. Returns the updated request. */
+    /**
+     * Adds user to the request's participants and takes one spot. When that was the last spot (ID010),
+     * the time slot is booked and the request becomes Confirmed. Returns the updated request.
+     */
     public GameRequest joinRequest(User user, String requestId) {
         Objects.requireNonNull(user, "User is required");
         Objects.requireNonNull(requestId, "Game request id is required");
@@ -78,9 +82,23 @@ public class GameRequestService {
         if (hasOverlappingGame(user, request.getTimeSlot())) {
             throw new InvalidGameRequestException(InvalidGameRequestException.OVERLAPPING_GAME_MESSAGE);
         }
+        boolean takesLastSpot = request.getSpotsRemaining() == 1;
+        if (takesLastSpot) {
+            // Book first: if the slot cannot be booked, nothing about the request has changed yet
+            request.getTimeSlot().book();
+        }
         request.addParticipant(user);
         request.setSpotsRemaining(request.getSpotsRemaining() - 1);
+        if (takesLastSpot) {
+            request.setStatus(GameRequestStatus.CONFIRMED);
+        }
         return request;
+    }
+
+    /** The message issued when a join confirms the game, e.g. "Game confirmed on Squash Court 1 on 2026-10-15 at 18:00". */
+    public static String confirmationMessage(GameRequest request) {
+        TimeSlot slot = request.getTimeSlot();
+        return String.format(CONFIRMED_MESSAGE_FORMAT, slot.court().name(), slot.date(), slot.start());
     }
 
     private String nextId() {
