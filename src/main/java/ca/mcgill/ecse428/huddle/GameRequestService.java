@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class GameRequestService {
 
@@ -23,6 +24,16 @@ public class GameRequestService {
             Sport.BASKETBALL, 10));
     private final List<GameRequest> requests = new ArrayList<>();
     private final List<Notification> notifications = new ArrayList<>();
+    private Consumer<GameRequest> beforeSlotCheckHook = request -> { };
+
+    /**
+     * Test hook (TID034): runs during joinRequest, just before the time slot availability is checked.
+     * Lets a test simulate something happening while a join is in progress, e.g. a facility admin
+     * booking the slot. Does nothing by default; null resets it.
+     */
+    public void setBeforeSlotCheckHook(Consumer<GameRequest> hook) {
+        beforeSlotCheckHook = hook == null ? request -> { } : hook;
+    }
 
     public void setMaxPlayers(Sport sport, int max) {
         maxPlayers.put(sport, max);
@@ -83,6 +94,7 @@ public class GameRequestService {
         if (!request.isOpen()) {
             throw new InvalidGameRequestException(InvalidGameRequestException.NOT_OPEN_MESSAGE);
         }
+        beforeSlotCheckHook.accept(request);
         if (!request.getTimeSlot().available()) {
             request.setStatus(GameRequestStatus.CANCELLED);
             TimeSlot slot = request.getTimeSlot();

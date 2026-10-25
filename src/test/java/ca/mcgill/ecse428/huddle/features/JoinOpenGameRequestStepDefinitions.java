@@ -8,6 +8,7 @@ import ca.mcgill.ecse428.huddle.GameRequest;
 import ca.mcgill.ecse428.huddle.GameRequestService;
 import ca.mcgill.ecse428.huddle.InvalidGameRequestException;
 import ca.mcgill.ecse428.huddle.User;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
@@ -23,6 +24,16 @@ public class JoinOpenGameRequestStepDefinitions {
     private GameRequest request(String requestId) {
         return world.gameRequestService.findById(requestId)
                 .orElseThrow(() -> new AssertionError("No game request with id " + requestId));
+    }
+
+    /** ID010 (TID034): the slot gets booked by a facility admin after the join starts but before it completes. */
+    @Given("a facility admin books the time slot of game request {string} while it is being joined")
+    public void a_facility_admin_books_the_time_slot_while_it_is_being_joined(String requestId) {
+        world.gameRequestService.setBeforeSlotCheckHook(request -> {
+            if (request.getId().equals(requestId)) {
+                request.getTimeSlot().book();
+            }
+        });
     }
 
     @When("{string} joins game request {string}")
