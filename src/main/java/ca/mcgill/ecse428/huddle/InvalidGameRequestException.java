@@ -9,6 +9,7 @@ public class InvalidGameRequestException extends RuntimeException {
     public static final String ALREADY_JOINED_MESSAGE = "You have already joined this game";
     public static final String GAME_FULL_MESSAGE = "This game is full";
     public static final String NOT_OPEN_MESSAGE = "This game is no longer open";
+    public static final String SLOT_NO_LONGER_AVAILABLE_MESSAGE = "Time slot is no longer available";
 
     public InvalidGameRequestException(String message) {
         super(message);
