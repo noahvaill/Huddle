@@ -11,6 +11,7 @@ public class GameRequestService {
 
     public static final String POSTED_MESSAGE = "Game request posted";
     public static final String JOINED_MESSAGE = "You have joined the game";
+    public static final String NO_OPEN_REQUESTS_MESSAGE = "No open game requests";
     public static final String CONFIRMED_MESSAGE_FORMAT = "Game confirmed on %s on %s at %s";
     public static final String CANCELLED_NOTIFICATION_FORMAT =
             "The %s game on %s at %s has been cancelled: time slot no longer available";   // sport display name, date, start
@@ -143,6 +144,14 @@ public class GameRequestService {
 
     public List<GameRequest> getRequests() {
         return List.copyOf(requests);
+    }
+
+    public List<GameRequest> getOpenGameRequests(User currentUser, String sportName) {
+        Sport sport = Sport.fromName(sportName);
+        Objects.requireNonNull(currentUser, "User is required");
+        return requests.stream()
+                .filter(r -> r.getSport() == sport && r.isOpen() && !r.isCreatedBy(currentUser))
+                .toList();
     }
 
     public Optional<GameRequest> findById(String id) {
