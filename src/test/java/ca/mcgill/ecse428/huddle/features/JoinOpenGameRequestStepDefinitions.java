@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.mcgill.ecse428.huddle.GameRequest;
 import ca.mcgill.ecse428.huddle.GameRequestService;
+import ca.mcgill.ecse428.huddle.GameRequestStatus;
 import ca.mcgill.ecse428.huddle.InvalidGameRequestException;
 import ca.mcgill.ecse428.huddle.User;
 import io.cucumber.java.en.Given;
@@ -39,8 +40,11 @@ public class JoinOpenGameRequestStepDefinitions {
     @When("{string} joins game request {string}")
     public void joins_game_request(String userName, String requestId) {
         try {
-            world.gameRequestService.joinRequest(new User(userName), requestId);
-            world.message = GameRequestService.JOINED_MESSAGE;
+            GameRequest joined = world.gameRequestService.joinRequest(new User(userName), requestId);
+            world.messages.add(GameRequestService.JOINED_MESSAGE);
+            if (joined.getStatus() == GameRequestStatus.CONFIRMED) {
+                world.messages.add(GameRequestService.confirmationMessage(joined));
+            }
         } catch (InvalidGameRequestException e) {
             world.errorMessage = e.getMessage();
         }
