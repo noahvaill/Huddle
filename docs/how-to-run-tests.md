@@ -59,6 +59,10 @@ Steps used by more than one story (login, time slots, messages) live in `CommonS
 Cucumber fails the build when a step has no step definition. Add a feature file in the same
 PR as its step definitions, or `./gradlew build` will fail on `main`.
 
+A groomed story whose step definitions do not exist yet can still be added: tag its feature file
+`@wip` next to the story ID (e.g. `@ID008 @wip`). `./gradlew build` leaves `@wip` features out, and
+`./gradlew test -Dcucumber.filter.tags=@ID008` still runs them. Remove `@wip` in the PR that adds the step definitions.
+
 ## Troubleshooting
 
 - **`Permission denied: ./gradlew`**: run `chmod +x gradlew`.
