@@ -40,6 +40,24 @@ class TimeSlotTest {
     }
 
     @Test
+    void releasingABookedSlotMakesItAvailableAgain() {
+        TimeSlot s = slot(false);
+        s.release();
+        assertTrue(s.available());
+        assertEquals(TimeSlotStatus.AVAILABLE, s.status());
+        s.book(); // can be booked again after release
+        assertFalse(s.available());
+    }
+
+    @Test
+    void releasingAnAvailableSlotFails() {
+        TimeSlot s = slot(true);
+        IllegalStateException e = assertThrows(IllegalStateException.class, s::release);
+        assertEquals("Time slot is not booked", e.getMessage());
+        assertTrue(s.available());
+    }
+
+    @Test
     void equalityIgnoresStatus() {
         TimeSlot a = slot(true);
         TimeSlot b = slot(false);
