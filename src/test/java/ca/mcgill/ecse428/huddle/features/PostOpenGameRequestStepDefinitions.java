@@ -26,7 +26,7 @@ public class PostOpenGameRequestStepDefinitions {
     private void postRequest(String userName, String slotId, int groupSize, int playersNeeded) {
         try {
             world.gameRequestService.postRequest(new User(userName), world.timeSlotsById.get(slotId), groupSize, playersNeeded);
-            world.message = GameRequestService.POSTED_MESSAGE;
+            world.messages.add(GameRequestService.POSTED_MESSAGE);
         } catch (InvalidGameRequestException e) {
             world.errorMessage = e.getMessage();
         }
