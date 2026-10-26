@@ -92,6 +92,16 @@ public class GameRequest {
         participants.add(user);
     }
 
+    public void removeParticipant(User user) {
+        Objects.requireNonNull(user, "Participant is required");
+        if (isCreatedBy(user)) {
+            throw new IllegalArgumentException("The creator cannot be removed from the participants");
+        }
+        if (!participants.remove(user)) {
+            throw new IllegalArgumentException("User is not a participant");
+        }
+    }
+
     public int getParticipantCount() { return groupSize + participants.size() - 1; }
     public Sport getSport() { return timeSlot.sport(); }
     public boolean isOpen() { return status == GameRequestStatus.OPEN; }

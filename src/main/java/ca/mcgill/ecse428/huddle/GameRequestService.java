@@ -11,6 +11,7 @@ public class GameRequestService {
 
     public static final String POSTED_MESSAGE = "Game request posted";
     public static final String JOINED_MESSAGE = "You have joined the game";
+    public static final String WITHDRAWN_MESSAGE = "You have withdrawn from the game";
     public static final String NO_OPEN_REQUESTS_MESSAGE = "No open game requests";
     public static final String CONFIRMED_MESSAGE_FORMAT = "Game confirmed on %s on %s at %s";
     public static final String CANCELLED_NOTIFICATION_FORMAT =
@@ -103,6 +104,16 @@ public class GameRequestService {
         if (takesLastSpot) {
             request.setStatus(GameRequestStatus.CONFIRMED);
         }
+        return request;
+    }
+    
+    public GameRequest withdrawFromRequest(User user, String requestId) {
+        Objects.requireNonNull(user, "User is required");
+        Objects.requireNonNull(requestId, "Game request id is required");
+        GameRequest request = findById(requestId)
+                .orElseThrow(() -> new InvalidGameRequestException(InvalidGameRequestException.REQUEST_NOT_FOUND_MESSAGE));
+        request.removeParticipant(user);
+        request.setSpotsRemaining(request.getSpotsRemaining() + 1);
         return request;
     }
 
