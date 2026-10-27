@@ -1,4 +1,4 @@
-@ID008 @wip
+@ID008
 Feature: Withdraw from a Game
 
 As a Huddle user who has joined a game
