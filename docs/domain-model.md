@@ -5,6 +5,11 @@ This is the domain model for the Sprint A stories (ID004, ID005, ID006, ID007, I
 The diagram is written in [Mermaid](https://mermaid.js.org/syntax/classDiagram.html): GitHub renders it in this file, and it can be edited or exported as an image at <https://mermaid.live>.
 
 ```mermaid
+---
+config:
+  class:
+    hideEmptyMembersBox: true
+---
 classDiagram
     class Sport {
         name : String
@@ -53,8 +58,10 @@ classDiagram
     User "1 creator" -- "0..* createdRequests" GameRequest
     User "1..* participants" -- "0..* joinedRequests" GameRequest
 
-    note for GameRequest "The creator is always a participant\nand cannot withdraw (ID008)"
+    note for GameRequest "The creator is always a participant<br>and cannot withdraw (ID008)"
 ```
+
+Association names read: a Court *is for* a Sport, a Court *has* TimeSlots, a FacilityAdministrator *books* TimeSlots, and a GameRequest *is for* a TimeSlot.
 
 ## Classes
 
