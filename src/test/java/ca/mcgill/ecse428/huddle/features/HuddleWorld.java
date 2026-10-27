@@ -3,7 +3,9 @@ package ca.mcgill.ecse428.huddle.features;
 import ca.mcgill.ecse428.huddle.GameRequestService;
 import ca.mcgill.ecse428.huddle.TimeSlot;
 import ca.mcgill.ecse428.huddle.TimeSlotService;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,6 +18,6 @@ public class HuddleWorld {
     public GameRequestService gameRequestService = new GameRequestService();
     public Map<String, TimeSlot> timeSlotsById = new HashMap<>();
     public String loggedInUser;
-    public String message;
+    public List<String> messages = new ArrayList<>(); // a join that fills the last spot issues two messages (ID010)
     public String errorMessage;
 }

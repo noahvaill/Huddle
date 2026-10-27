@@ -27,7 +27,7 @@ public class ViewAvailableTimeSlotsStepDefinitions {
         try {
             listedSlots = world.timeSlotService.getAvailableTimeSlots(sport, LocalDate.parse(date));
             if (listedSlots.isEmpty()) {
-                world.message = TimeSlotService.NO_AVAILABLE_SLOTS_MESSAGE;
+                world.messages.add(TimeSlotService.NO_AVAILABLE_SLOTS_MESSAGE);
             }
         } catch (SportNotOfferedException e) {
             listedSlots = List.of();

@@ -28,7 +28,7 @@ public class BrowseOpenGameRequestsStepDefinitions {
         try {
             listedRequests = world.gameRequestService.getOpenGameRequests(new User(userName), sport);
             if (listedRequests.isEmpty()) {
-                world.message = GameRequestService.NO_OPEN_REQUESTS_MESSAGE;
+                world.messages.add(GameRequestService.NO_OPEN_REQUESTS_MESSAGE);
             }
         } catch (SportNotOfferedException e) {
             listedRequests = List.of();
