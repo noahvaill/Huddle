@@ -22,7 +22,7 @@ public class WithdrawFromGameStepDefinitions {
     public void withdraws_from_game_request(String userName, String requestId) {
         try {
             world.gameRequestService.withdrawFromRequest(new User(userName), requestId);
-            world.message = GameRequestService.WITHDRAWN_MESSAGE;
+            world.messages.add(GameRequestService.WITHDRAWN_MESSAGE);
         } catch (InvalidGameRequestException e) {
             world.errorMessage = e.getMessage();
         }
