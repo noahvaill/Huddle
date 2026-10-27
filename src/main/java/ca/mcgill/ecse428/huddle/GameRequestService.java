@@ -147,6 +147,22 @@ public class GameRequestService {
         return request;
     }
 
+    /**
+     * Cancels a game request (ID009, TID051), retaining it and its participants for lookup.
+     * Repeated cancellation returns the request unchanged. Creator-only validation, participant
+     * notifications and slot release are added by TID054, TID052 and TID053 respectively.
+     */
+    public GameRequest cancelRequest(User user, String requestId) {
+        Objects.requireNonNull(user, "User is required");
+        Objects.requireNonNull(requestId, "Game request id is required");
+        GameRequest request = findById(requestId)
+                .orElseThrow(() -> new InvalidGameRequestException(InvalidGameRequestException.REQUEST_NOT_FOUND_MESSAGE));
+        if (request.getStatus() != GameRequestStatus.CANCELLED) {
+            request.setStatus(GameRequestStatus.CANCELLED);
+        }
+        return request;
+    }
+
     /** The message issued when a join confirms the game, e.g. "Game confirmed on Squash Court 1 on 2026-10-15 at 18:00". */
     public static String confirmationMessage(GameRequest request) {
         TimeSlot slot = request.getTimeSlot();
