@@ -6,7 +6,8 @@ import java.util.Objects;
 
 /**
  * A period on a given date during which a court can be booked.
- * Court, date and times never change; the status goes from Available to Booked when a game is confirmed (ID010).
+ * Court, date and times never change; the status goes from Available to Booked when a game is confirmed (ID010),
+ * and back to Available when that game reopens because a participant withdrew (ID008).
  */
 public final class TimeSlot {
 
@@ -45,6 +46,14 @@ public final class TimeSlot {
             throw new IllegalStateException("Time slot is already booked");
         }
         status = TimeSlotStatus.BOOKED;
+    }
+
+    /** Releases the slot when its confirmed game reopens (ID008). Fails if it is not booked. */
+    public void release() {
+        if (status != TimeSlotStatus.BOOKED) {
+            throw new IllegalStateException("Time slot is not booked");
+        }
+        status = TimeSlotStatus.AVAILABLE;
     }
 
     /** Two slots are the same slot when they have the same court, date and times, whatever their status. */

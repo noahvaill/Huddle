@@ -119,13 +119,31 @@ public class GameRequestService {
         return request;
     }
     
+    /**
+     * Removes user from the request's participants and frees one spot (ID008). The creator cannot withdraw,
+     * and only a participant can. When the game was Confirmed, it reopens and its time slot is released,
+     * so the game can fill up and be confirmed again. Returns the updated request.
+     */
     public GameRequest withdrawFromRequest(User user, String requestId) {
         Objects.requireNonNull(user, "User is required");
         Objects.requireNonNull(requestId, "Game request id is required");
         GameRequest request = findById(requestId)
                 .orElseThrow(() -> new InvalidGameRequestException(InvalidGameRequestException.REQUEST_NOT_FOUND_MESSAGE));
+        if (request.isCreatedBy(user)) {
+            throw new InvalidGameRequestException(InvalidGameRequestException.CREATOR_CANNOT_WITHDRAW_MESSAGE);
+        }
+        if (!request.hasParticipant(user)) {
+            throw new InvalidGameRequestException(InvalidGameRequestException.NOT_A_PARTICIPANT_MESSAGE);
+        }
         request.removeParticipant(user);
         request.setSpotsRemaining(request.getSpotsRemaining() + 1);
+        if (request.getStatus() == GameRequestStatus.CONFIRMED) {
+            request.setStatus(GameRequestStatus.OPEN);
+            // The slot was booked when the game was confirmed; free it, otherwise the next join would cancel the game
+            if (!request.getTimeSlot().available()) {
+                request.getTimeSlot().release();
+            }
+        }
         return request;
     }
 

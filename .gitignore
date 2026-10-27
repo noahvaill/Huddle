@@ -22,3 +22,6 @@ gradle-app.setting
 
 # VS Code Java build output
 bin/
+
+# IntelliJ project files (personal IDE settings)
+.idea/

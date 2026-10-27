@@ -10,6 +10,9 @@ public class InvalidGameRequestException extends RuntimeException {
     public static final String GAME_FULL_MESSAGE = "This game is full";
     public static final String NOT_OPEN_MESSAGE = "This game is no longer open";
     public static final String SLOT_NO_LONGER_AVAILABLE_MESSAGE = "Time slot is no longer available";
+    public static final String NOT_A_PARTICIPANT_MESSAGE = "You are not a participant of this game";
+    public static final String CREATOR_CANNOT_WITHDRAW_MESSAGE =
+            "The creator cannot withdraw and must cancel the game request instead";
 
     public InvalidGameRequestException(String message) {
         super(message);
