@@ -12,11 +12,14 @@ public class GameRequestService {
 
     public static final String POSTED_MESSAGE = "Game request posted";
     public static final String JOINED_MESSAGE = "You have joined the game";
+    public static final String CANCELLED_MESSAGE = "Game request cancelled";
     public static final String WITHDRAWN_MESSAGE = "You have withdrawn from the game";
     public static final String NO_OPEN_REQUESTS_MESSAGE = "No open game requests";
     public static final String CONFIRMED_MESSAGE_FORMAT = "Game confirmed on %s on %s at %s";
     public static final String CANCELLED_NOTIFICATION_FORMAT =
             "The %s game on %s at %s has been cancelled: time slot no longer available";   // sport display name, date, start
+    public static final String CANCELLED_BY_CREATOR_NOTIFICATION_FORMAT =
+            "The %s game on %s at %s has been cancelled by the creator";   // sport display name, date, start
     private final Map<Sport, Integer> maxPlayers = new EnumMap<>(Map.of(
             Sport.SQUASH, 2,
             Sport.TENNIS, 2,
@@ -149,16 +152,31 @@ public class GameRequestService {
 
     /**
      * Cancels a game request (ID009, TID051), retaining it and its participants for lookup.
-     * Repeated cancellation returns the request unchanged. Creator-only validation, participant
-     * notifications and slot release are added by TID054, TID052 and TID053 respectively.
+     * Every joined participant is notified that the creator cancelled the game (TID052); the creator
+     * is not. A confirmed game's booked time slot is released (TID053). Repeated cancellation returns
+     * the request unchanged and sends nothing new. Creator-only validation is added by TID054.
      */
     public GameRequest cancelRequest(User user, String requestId) {
         Objects.requireNonNull(user, "User is required");
         Objects.requireNonNull(requestId, "Game request id is required");
         GameRequest request = findById(requestId)
                 .orElseThrow(() -> new InvalidGameRequestException(InvalidGameRequestException.REQUEST_NOT_FOUND_MESSAGE));
+        if (!request.isCreatedBy(user)) {
+            throw new InvalidGameRequestException(InvalidGameRequestException.ONLY_CREATOR_CAN_CANCEL_MESSAGE);
+        }
         if (request.getStatus() != GameRequestStatus.CANCELLED) {
+            if (request.getStatus() == GameRequestStatus.CONFIRMED
+                    && !request.getTimeSlot().available()) {
+                request.getTimeSlot().release();
+            }
             request.setStatus(GameRequestStatus.CANCELLED);
+            TimeSlot slot = request.getTimeSlot();
+            for (User participant : request.getParticipants()) {
+                if (!request.isCreatedBy(participant)) {
+                    notifications.add(new Notification(participant, String.format(CANCELLED_BY_CREATOR_NOTIFICATION_FORMAT,
+                            slot.sport().getDisplayName(), slot.date(), slot.start())));
+                }
+            }
         }
         return request;
     }
