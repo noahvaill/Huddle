@@ -1,6 +1,6 @@
 # Huddle Domain Model
 
-This is the domain model for the Sprint A stories (ID004, ID005, ID006, ID007, ID008 and ID010). It is based on the scenarios in our feature files and will be updated during the sprint if needed.
+This is the domain model for the Sprint A stories (ID004, ID005, ID006, ID007, ID008, ID009 and ID010). It is based on the scenarios in our feature files and will be updated during the sprint if needed.
 
 
 ```mermaid
@@ -57,7 +57,7 @@ classDiagram
     User "1 creator" -- "0..* createdRequests" GameRequest
     User "1..* participants" -- "0..* joinedRequests" GameRequest
 
-    note for GameRequest "The creator is always a participant<br>and cannot withdraw (ID008)"
+    note for GameRequest "The creator is always a participant<br>and cannot withdraw (ID008).<br>Only the creator can cancel (ID009)"
 ```
 
 Association names read: a Court *is for* a Sport, a Court *has* TimeSlots, a FacilityAdministrator *books* TimeSlots, and a GameRequest *is for* a TimeSlot.
@@ -69,7 +69,7 @@ Association names read: a Court *is for* a Sport, a Court *has* TimeSlots, a Fac
 - **TimeSlot**: a period on a court. Its status is Available or Booked.
 - **GameRequest**: a game posted by a user for a time slot. groupSize is the number of players the creator brings and spotsRemaining is how many more players are needed.
 - **User**: a Huddle user. A user can create game requests and join other users' game requests, and receives notifications.
-- **Notification**: a message sent to a user, e.g. when their game is cancelled because its time slot was booked.
+- **Notification**: a message sent to a user, e.g. when their game is cancelled because its time slot was booked, or when the creator cancels a game they joined.
 - **FacilityAdministrator**: a McGill facility administrator, who can book a time slot directly.
-- **TimeSlotStatus**: Available, or Booked once a game is confirmed or an administrator books the slot.
-- **GameRequestStatus**: Open while spots remain, Confirmed when the last spot is filled, Cancelled when the time slot is no longer available. A Confirmed game goes back to Open when a participant withdraws.
+- **TimeSlotStatus**: Available, or Booked once a game is confirmed or an administrator books the slot. A Booked slot goes back to Available when its confirmed game is cancelled.
+- **GameRequestStatus**: Open while spots remain, Confirmed when the last spot is filled, Cancelled when the time slot is no longer available or the creator cancels the game. A Confirmed game goes back to Open when a participant withdraws. A cancelled game keeps its participants.
