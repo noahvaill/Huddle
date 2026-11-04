@@ -13,6 +13,7 @@ public class InvalidGameRequestException extends RuntimeException {
     public static final String NOT_A_PARTICIPANT_MESSAGE = "You are not a participant of this game";
     public static final String CREATOR_CANNOT_WITHDRAW_MESSAGE =
             "The creator cannot withdraw and must cancel the game request instead";
+    public static final String ONLY_CREATOR_CAN_CANCEL_MESSAGE = "Only the creator can cancel this game request";
 
     public InvalidGameRequestException(String message) {
         super(message);
