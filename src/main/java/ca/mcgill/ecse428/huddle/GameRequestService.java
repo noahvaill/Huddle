@@ -152,8 +152,8 @@ public class GameRequestService {
     /**
      * Cancels a game request (ID009, TID051), retaining it and its participants for lookup.
      * Every joined participant is notified that the creator cancelled the game (TID052); the creator
-     * is not. A confirmed game's booked time slot is released (TID053). Repeated cancellation returns
-     * the request unchanged and sends nothing new. Creator-only validation is added by TID054.
+     * is not. Repeated cancellation returns the request unchanged and sends nothing new. Creator-only
+     * validation and slot release are added by TID054 and TID053 respectively.
      */
     public GameRequest cancelRequest(User user, String requestId) {
         Objects.requireNonNull(user, "User is required");
