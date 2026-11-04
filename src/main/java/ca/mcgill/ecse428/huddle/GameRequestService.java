@@ -161,6 +161,10 @@ public class GameRequestService {
         GameRequest request = findById(requestId)
                 .orElseThrow(() -> new InvalidGameRequestException(InvalidGameRequestException.REQUEST_NOT_FOUND_MESSAGE));
         if (request.getStatus() != GameRequestStatus.CANCELLED) {
+            if (request.getStatus() == GameRequestStatus.CONFIRMED
+                    && !request.getTimeSlot().available()) {
+                request.getTimeSlot().release();
+            }
             request.setStatus(GameRequestStatus.CANCELLED);
             TimeSlot slot = request.getTimeSlot();
             for (User participant : request.getParticipants()) {
