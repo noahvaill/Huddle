@@ -1,4 +1,4 @@
-@ID009 @wip
+@ID009
 Feature: Cancel a Game Request
 
 As the creator of a game request
