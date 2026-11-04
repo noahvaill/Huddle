@@ -18,21 +18,21 @@ Background:
     | R2      | Carla Dubois | S3   | 1               | Open   | 9            |
     | R4      | Carla Dubois | S4   | 1               | Open   | 1            |
 
-Scenario: The last needed player joins a two-player game (Normal Flow)
+Scenario: ID010_The last needed player joins a two-player game (Normal Flow)
   When "Bob Tremblay" joins game request "R1"
   Then game request "R1" has status "Confirmed"
   And time slot "S1" has status "Booked"
   And game request "R1" has 2 participants
   And the confirmation message "Game confirmed on Squash Court 1 on 2026-10-15 at 18:00" is issued
 
-Scenario: The last needed player joins a group game (Alternate Flow)
+Scenario: ID010_The last needed player joins a group game (Alternate Flow)
   When "Bob Tremblay" joins game request "R2"
   Then game request "R2" has status "Confirmed"
   And time slot "S3" has status "Booked"
   And game request "R2" has 10 participants
   And the confirmation message "Game confirmed on Basketball Court on 2026-10-15 at 19:00" is issued
 
-Scenario: The last needed player joins but the time slot is no longer available (Error Flow)
+Scenario: ID010_The last needed player joins but the time slot is no longer available (Error Flow)
   Given the time slot "S4" is booked by a facility administrator before the join is completed
   When "Bob Tremblay" joins game request "R4"
   Then "Bob Tremblay" is not a participant of game request "R4"

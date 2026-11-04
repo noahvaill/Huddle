@@ -16,35 +16,35 @@ Background:
     | R5      | Dan Lee      | Badminton  | 2026-10-19 | 17:00 | 18:00 | 2               | Open      | Dan Lee, Bob Tremblay  |
     | R6      | Eva Roy      | Tennis     | 2026-10-19 | 17:30 | 18:30 | 1               | Open      | Eva Roy                |
 
-Scenario: Join a game request with one spot remaining (Normal Flow)
+Scenario: ID007_Join a game request with one spot remaining (Normal Flow)
   When "Bob Tremblay" joins game request "R1"
   Then "Bob Tremblay" is a participant of game request "R1"
   And game request "R1" has 0 spots remaining
   And the confirmation message "You have joined the game" is issued
 
-Scenario: Join a group game request with several spots remaining (Alternate Flow)
+Scenario: ID007_Join a group game request with several spots remaining (Alternate Flow)
   When "Bob Tremblay" joins game request "R2"
   Then "Bob Tremblay" is a participant of game request "R2"
   And game request "R2" has 4 spots remaining
   And game request "R2" has status "Open"
   And the confirmation message "You have joined the game" is issued
 
-Scenario: Join a game request that is already full (Error Flow)
+Scenario: ID007_Join a game request that is already full (Error Flow)
   When "Bob Tremblay" joins game request "R3"
   Then "Bob Tremblay" is not a participant of game request "R3"
   And the error message "This game is full" is issued
 
-Scenario: Join your own game request (Error Flow)
+Scenario: ID007_Join your own game request (Error Flow)
   When "Bob Tremblay" joins game request "R4"
   Then game request "R4" has 1 spot remaining
   And the error message "You cannot join your own game request" is issued
 
-Scenario: Join a game request that you have already joined (Error Flow)
+Scenario: ID007_Join a game request that you have already joined (Error Flow)
   When "Bob Tremblay" joins game request "R5"
   Then game request "R5" has 2 spots remaining
   And the error message "You have already joined this game" is issued
 
-Scenario: Join a game request that overlaps another game of the same user (Error Flow)
+Scenario: ID007_Join a game request that overlaps another game of the same user (Error Flow)
   When "Bob Tremblay" joins game request "R6"
   Then "Bob Tremblay" is not a participant of game request "R6"
   And game request "R6" has 1 spot remaining
