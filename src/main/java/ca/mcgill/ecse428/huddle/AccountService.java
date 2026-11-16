@@ -14,11 +14,45 @@ import java.util.Optional;
  */
 public class AccountService {
 
+    public static final String ACCOUNT_CREATED_MESSAGE = "Account created";
+    private static final String STUDENT_EMAIL_DOMAIN = "@mail.mcgill.ca";
+    private static final String STAFF_EMAIL_DOMAIN = "@mcgill.ca";
+
     private final Map<String, Account> accountsByEmail = new LinkedHashMap<>();
 
     /**
-     * Adds an existing account as it is, e.g. the accounts in a feature file's Background.
-     * Fails if an account already exists for its email address, in any case.
+     * Creates an account for a McGill student or staff member (ID001) and returns it.
+     * Only @mail.mcgill.ca (student) and @mcgill.ca (staff) addresses are accepted, in any case and with
+     * surrounding spaces, and an email address can have only one account. A student address gets the Student role
+     * and a staff address the Staff role. Nothing is added when a rule is broken.
+     */
+    public Account createAccount(String name, String email, String password) {
+        Role role = roleForMcGillEmail(email);
+        if (findByEmail(email).isPresent()) {
+            throw new InvalidAccountException(InvalidAccountException.EMAIL_ALREADY_IN_USE_MESSAGE);
+        }
+        Account account = new Account(new User(name), email, password, role);
+        addAccount(account);
+        return account;
+    }
+
+    /** Student or Staff for a McGill address with exactly one @ and something before it; fails for any other address. */
+    private static Role roleForMcGillEmail(String email) {
+        String normalized = email == null ? "" : email.strip().toLowerCase(Locale.ROOT);
+        int at = normalized.indexOf('@');
+        boolean oneAtWithNameBeforeIt = at > 0 && at == normalized.lastIndexOf('@');
+        if (oneAtWithNameBeforeIt && normalized.endsWith(STUDENT_EMAIL_DOMAIN)) {
+            return Role.STUDENT;
+        }
+        if (oneAtWithNameBeforeIt && normalized.endsWith(STAFF_EMAIL_DOMAIN)) {
+            return Role.STAFF;
+        }
+        throw new InvalidAccountException(InvalidAccountException.MCGILL_EMAIL_REQUIRED_MESSAGE);
+    }
+
+    /**
+     * Adds an existing account as it is, without createAccount's McGill rules, e.g. the accounts in a feature file's
+     * Background. Fails if an account already exists for its email address, in any case.
      */
     public void addAccount(Account account) {
         Objects.requireNonNull(account, "Account is required");

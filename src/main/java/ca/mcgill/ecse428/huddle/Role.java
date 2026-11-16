@@ -1,8 +1,11 @@
 package ca.mcgill.ecse428.huddle;
 
-/** What an account is allowed to do in Huddle, matching the feature-file wording (ID001, ID002, ID003). */
+/**
+ * What an account is allowed to do in Huddle, matching the feature-file wording (ID001, ID002, ID003).
+ * Staff is the role a new @mcgill.ca account gets (ID001); this is an assumption until the Product Owner confirms it.
+ */
 public enum Role {
-    STUDENT("Student"), FACILITY_ADMINISTRATOR("Facility Administrator");
+    STUDENT("Student"), STAFF("Staff"), FACILITY_ADMINISTRATOR("Facility Administrator");
 
     private final String displayName;
     Role(String displayName) { this.displayName = displayName; }
