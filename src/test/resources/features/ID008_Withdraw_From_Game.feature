@@ -14,25 +14,25 @@ Background:
     | R3      | Carla Dubois | Badminton  | 2026-10-16 | 17:00 | 18:00 | 2               | Open      | Carla Dubois, Dan Lee               |
     | R5      | Bob Tremblay | Squash     | 2026-10-18 | 18:00 | 18:45 | 1               | Open      | Bob Tremblay                        |
 
-Scenario: Withdraw from an open game (Normal Flow)
+Scenario: ID008_Withdraw from an open game (Normal Flow)
   When "Bob Tremblay" withdraws from game request "R2"
   Then "Bob Tremblay" is not a participant of game request "R2"
   And game request "R2" has 4 spots remaining
   And the confirmation message "You have withdrawn from the game" is issued
 
-Scenario: Withdraw from a confirmed game (Alternate Flow)
+Scenario: ID008_Withdraw from a confirmed game (Alternate Flow)
   When "Bob Tremblay" withdraws from game request "R1"
   Then "Bob Tremblay" is not a participant of game request "R1"
   And game request "R1" has 1 spot remaining
   And game request "R1" has status "Open"
   And the confirmation message "You have withdrawn from the game" is issued
 
-Scenario: Withdraw from a game that you have not joined (Error Flow)
+Scenario: ID008_Withdraw from a game that you have not joined (Error Flow)
   When "Bob Tremblay" withdraws from game request "R3"
   Then game request "R3" has 2 spots remaining
   And the error message "You are not a participant of this game" is issued
 
-Scenario: The creator attempts to withdraw from their own game (Error Flow)
+Scenario: ID008_The creator attempts to withdraw from their own game (Error Flow)
   When "Bob Tremblay" withdraws from game request "R5"
   Then "Bob Tremblay" is a participant of game request "R5"
   And the error message "The creator cannot withdraw and must cancel the game request instead" is issued

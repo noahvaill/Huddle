@@ -19,22 +19,22 @@ Background:
     | Badminton  | 4           |
     | Basketball | 10          |
 
-Scenario: Post a request for one partner (Normal Flow)
+Scenario: ID005_Post a request for one partner (Normal Flow)
   When "Alice Chen" posts an open game request for time slot "S1" needing 1 more player
   Then an open game request exists for time slot "S1" created by "Alice Chen" with 1 spot remaining
   And the confirmation message "Game request posted" is issued
 
-Scenario: Post a request on behalf of a group looking for another group (Alternate Flow)
+Scenario: ID005_Post a request on behalf of a group looking for another group (Alternate Flow)
   When "Alice Chen" posts an open game request for time slot "S3" for a group of 5 players needing 5 more players
   Then an open game request exists for time slot "S3" created by "Alice Chen" with 5 spots remaining
   And the confirmation message "Game request posted" is issued
 
-Scenario: Post a request for a time slot that is already booked (Error Flow)
+Scenario: ID005_Post a request for a time slot that is already booked (Error Flow)
   When "Alice Chen" posts an open game request for time slot "S2" needing 1 more player
   Then no open game request exists for time slot "S2"
   And the error message "Time slot is not available" is issued
 
-Scenario Outline: Post a request with an invalid number of players (Error Flow)
+Scenario Outline: ID005_Post a request with an invalid number of players (Error Flow)
   When "Alice Chen" posts an open game request for time slot "<slot>" needing <players> more players
   Then no open game request exists for time slot "<slot>"
   And the error message "<message>" is issued
@@ -45,7 +45,7 @@ Scenario Outline: Post a request with an invalid number of players (Error Flow)
     | S1   | 3       | Squash allows at most 1 more player     |
     | S4   | 5       | Badminton allows at most 3 more players |
 
-Scenario: Post a request that overlaps another game of the same user (Error Flow)
+Scenario: ID005_Post a request that overlaps another game of the same user (Error Flow)
   Given "Alice Chen" has an open game request for time slot "S4"
   When "Alice Chen" posts an open game request for time slot "S1" needing 1 more player
   Then no open game request exists for time slot "S1"
