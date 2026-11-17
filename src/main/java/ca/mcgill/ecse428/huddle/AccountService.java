@@ -19,12 +19,14 @@ import java.util.Optional;
 public class AccountService {
 
     public static final String ACCOUNT_CREATED_MESSAGE = "Account created";
+    public static final String LOGGED_IN_MESSAGE_FORMAT = "Welcome back, %s";   // user name
     private static final String STUDENT_EMAIL_DOMAIN = "@mail.mcgill.ca";
     private static final String STAFF_EMAIL_DOMAIN = "@mcgill.ca";
 
     private final Map<String, Account> accountsByEmail = new LinkedHashMap<>();
     private final Map<String, PasswordResetLink> resetLinksByToken = new HashMap<>();
     private Clock clock = Clock.systemDefaultZone();
+    private Session activeSession;
 
     /**
      * Creates an account for a McGill student or staff member (ID001) and returns it.
@@ -79,6 +81,36 @@ public class AccountService {
     /** The first account that belongs to this user, for steps that name a user (e.g. "Frank Ho" is logged in). */
     public Optional<Account> findByUser(User user) {
         return accountsByEmail.values().stream().filter(a -> a.getUser().equals(user)).findFirst();
+    }
+
+    /**
+     * Logs in with an email address and password (ID002, TID009) and returns the new active session, which carries
+     * the account's role. The email is matched in any case and with surrounding spaces; the password must match
+     * exactly. Logging in replaces any session that was active.
+     * A wrong password and an unknown email give the same error (TID010), so the error does not reveal which
+     * addresses have an account, and the active session is left unchanged.
+     */
+    public Session logIn(String email, String password) {
+        Account account = findByEmail(email)
+                .filter(a -> a.passwordMatches(password))
+                .orElseThrow(() -> new InvalidAccountException(InvalidAccountException.INVALID_CREDENTIALS_MESSAGE));
+        activeSession = new Session(account);
+        return activeSession;
+    }
+
+    /** The session started by the last successful log in; empty if nobody has logged in. */
+    public Optional<Session> getActiveSession() {
+        return Optional.ofNullable(activeSession);
+    }
+
+    /** Whether this user has the active session, for steps like "Alice Chen" is logged in to Huddle. */
+    public boolean isLoggedIn(User user) {
+        return activeSession != null && activeSession.user().equals(user);
+    }
+
+    /** The message issued when an account logs in, e.g. "Welcome back, Alice Chen". */
+    public static String loggedInMessage(Account account) {
+        return String.format(LOGGED_IN_MESSAGE_FORMAT, account.getName());
     }
 
     /** All accounts, in the order they were added. */
