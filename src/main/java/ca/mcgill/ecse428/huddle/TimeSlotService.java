@@ -1,5 +1,6 @@
 package ca.mcgill.ecse428.huddle;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -22,16 +23,58 @@ public class TimeSlotService {
      * e.g. 18:00-18:45 and 18:45-19:30, do not overlap). Nothing is added when a rule is broken.
      */
     public TimeSlot publishTimeSlot(Account publisher, Court court, LocalDate date, LocalTime start, LocalTime end) {
+        requireFacilityAdministrator(publisher);
+        TimeSlot slot = new TimeSlot(court, date, start, end, TimeSlotStatus.AVAILABLE);
+        requireNoOverlap(slot);
+        timeSlots.add(slot);
+        return slot;
+    }
+
+    /**
+     * Publishes adjacent Available slots covering a same-day range (ID003, TID017). The positive interval must
+     * divide the range exactly. The returned list is immutable and ordered by start time. All slots are checked
+     * before any are added, so invalid inputs or an overlap leave the schedule unchanged.
+     */
+    public List<TimeSlot> publishConsecutiveTimeSlots(Account publisher, Court court, LocalDate date,
+                                                     LocalTime start, LocalTime end, int intervalMinutes) {
+        requireFacilityAdministrator(publisher);
+        // Reuse the single-slot rules for required details and end after start, including their error messages.
+        TimeSlot range = new TimeSlot(court, date, start, end, TimeSlotStatus.AVAILABLE);
+        if (intervalMinutes <= 0) {
+            throw new IllegalArgumentException("Interval must be positive");
+        }
+        Duration interval = Duration.ofMinutes(intervalMinutes);
+        Duration duration = Duration.between(range.start(), range.end());
+        long slotCount = duration.dividedBy(interval);
+        if (slotCount == 0 || !interval.multipliedBy(slotCount).equals(duration)) {
+            throw new IllegalArgumentException("Time range must contain a whole number of intervals");
+        }
+
+        List<TimeSlot> slots = new ArrayList<>();
+        LocalTime slotStart = start;
+        for (long i = 0; i < slotCount; i++) {
+            LocalTime slotEnd = slotStart.plusMinutes(intervalMinutes);
+            TimeSlot slot = new TimeSlot(court, date, slotStart, slotEnd, TimeSlotStatus.AVAILABLE);
+            requireNoOverlap(slot);
+            slots.add(slot);
+            slotStart = slotEnd;
+        }
+        List<TimeSlot> published = List.copyOf(slots);
+        timeSlots.addAll(published);
+        return published;
+    }
+
+    private static void requireFacilityAdministrator(Account publisher) {
         Objects.requireNonNull(publisher, "Publisher is required");
         if (publisher.getRole() != Role.FACILITY_ADMINISTRATOR) {
             throw new InvalidTimeSlotException(InvalidTimeSlotException.FACILITY_ADMINISTRATOR_ONLY_MESSAGE);
         }
-        TimeSlot slot = new TimeSlot(court, date, start, end, TimeSlotStatus.AVAILABLE);
+    }
+
+    private void requireNoOverlap(TimeSlot slot) {
         if (overlapsExistingSlot(slot)) {
             throw new InvalidTimeSlotException(InvalidTimeSlotException.OVERLAPPING_SLOT_MESSAGE);
         }
-        timeSlots.add(slot);
-        return slot;
     }
 
     // Whatever its status, a slot on the same court and date blocks any slot whose times intersect it
