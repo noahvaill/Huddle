@@ -12,7 +12,7 @@ public final class Account {
 
     private final User user;
     private final String email;
-    private final String password;
+    private String password;
     private final Role role;
 
     public Account(User user, String email, String password, Role role) {
@@ -44,6 +44,15 @@ public final class Account {
     /** Whether the given password is this account's password. Passwords are case-sensitive and never stripped. */
     public boolean passwordMatches(String candidate) {
         return password.equals(candidate);
+    }
+
+    /** Replaces the password (ID011), with the same rules as a new account's password. */
+    public void changePassword(String newPassword) {
+        Objects.requireNonNull(newPassword, "Password is required");
+        if (newPassword.isEmpty()) {
+            throw new IllegalArgumentException("Password must not be empty");
+        }
+        this.password = newPassword;
     }
 
     /** Never shows the password. */
