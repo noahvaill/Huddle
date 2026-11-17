@@ -1,5 +1,9 @@
 package ca.mcgill.ecse428.huddle;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -19,6 +23,8 @@ public class AccountService {
     private static final String STAFF_EMAIL_DOMAIN = "@mcgill.ca";
 
     private final Map<String, Account> accountsByEmail = new LinkedHashMap<>();
+    private final Map<String, PasswordResetLink> resetLinksByToken = new HashMap<>();
+    private Clock clock = Clock.systemDefaultZone();
 
     /**
      * Creates an account for a McGill student or staff member (ID001) and returns it.
@@ -78,5 +84,28 @@ public class AccountService {
     /** All accounts, in the order they were added. */
     public List<Account> getAccounts() {
         return List.copyOf(accountsByEmail.values());
+    }
+
+    /** Adds a password reset link (ID011), e.g. the links in a feature file's Background. Tokens must be unique. */
+    public void addResetLink(PasswordResetLink link) {
+        Objects.requireNonNull(link, "Reset link is required");
+        if (resetLinksByToken.putIfAbsent(link.getToken(), link) != null) {
+            throw new IllegalArgumentException("A reset link already exists with this token");
+        }
+    }
+
+    /** The reset link with this token; empty if there is none. */
+    public Optional<PasswordResetLink> findResetLink(String token) {
+        return Optional.ofNullable(token == null ? null : resetLinksByToken.get(token));
+    }
+
+    /** The current date and time, used to check whether a reset link has expired (ID011). */
+    public LocalDateTime currentDateTime() {
+        return LocalDateTime.now(clock);
+    }
+
+    /** Test hook: fixes the current date and time, so scenarios about expired links do not depend on the real clock. */
+    public void setCurrentDateTime(LocalDateTime dateTime) {
+        clock = Clock.fixed(dateTime.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
     }
 }
