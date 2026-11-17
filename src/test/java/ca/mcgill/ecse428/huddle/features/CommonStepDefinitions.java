@@ -13,6 +13,7 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +31,12 @@ public class CommonStepDefinitions {
     @Given("{string} is logged in to Huddle")
     public void is_logged_in_to_huddle(String userName) {
         world.loggedInUser = userName;
+    }
+
+    /** Test hook (TID027): fixes "now", e.g. "2026-11-20 18:00", so link expiry does not depend on the real clock. */
+    @Given("the current date and time is {string}")
+    public void the_current_date_and_time_is(String dateTime) {
+        world.accountService.setCurrentDateTime(LocalDateTime.parse(dateTime.strip().replace(' ', 'T')));
     }
 
     @Given("the following time slots exist:")
