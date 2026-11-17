@@ -18,7 +18,7 @@ Background:
     | R2      | Alice Chen   | S2   | 2               | Open      | Alice Chen, Dan Lee      |
     | R3      | Carla Dubois | S3   | 2               | Open      | Carla Dubois, Alice Chen |
 
-Scenario: Cancel an open game request (Normal Flow)
+Scenario: ID009_Cancel an open game request (Normal Flow)
   When "Alice Chen" cancels game request "R2"
   Then game request "R2" has status "Cancelled"
   And "Dan Lee" receives the notification "The Badminton game on 2026-10-16 at 17:00 has been cancelled by the creator"
@@ -26,7 +26,7 @@ Scenario: Cancel an open game request (Normal Flow)
   And time slot "S2" has status "Available"
   And the confirmation message "Game request cancelled" is issued
 
-Scenario: Cancel a confirmed game request (Alternate Flow)
+Scenario: ID009_Cancel a confirmed game request (Alternate Flow)
   When "Alice Chen" cancels game request "R1"
   Then game request "R1" has status "Cancelled"
   And time slot "S1" has status "Available"
@@ -34,12 +34,12 @@ Scenario: Cancel a confirmed game request (Alternate Flow)
   And "Alice Chen" receives no notification
   And the confirmation message "Game request cancelled" is issued
 
-Scenario: Cancel a game request created by another user (Error Flow)
+Scenario: ID009_Cancel a game request created by another user (Error Flow)
   When "Alice Chen" cancels game request "R3"
   Then game request "R3" has status "Open"
   And "Carla Dubois" receives no notification
   And the error message "Only the creator can cancel this game request" is issued
 
-Scenario: Cancel a game request that does not exist (Error Flow)
+Scenario: ID009_Cancel a game request that does not exist (Error Flow)
   When "Alice Chen" cancels game request "R9"
   Then the error message "Game request not found" is issued
