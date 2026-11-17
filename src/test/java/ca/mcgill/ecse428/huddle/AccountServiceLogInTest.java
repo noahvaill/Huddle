@@ -2,17 +2,21 @@ package ca.mcgill.ecse428.huddle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Unit tests for logging in, AccountService.logIn (ID002, TID009-TID010). */
+/** Unit tests for logging in, AccountService.logIn (ID002, TID009-TID010 and TID012). */
 class AccountServiceLogInTest {
 
     private static final User ALICE = new User("Alice Chen");
@@ -48,6 +52,35 @@ class AccountServiceLogInTest {
         Session session = service.logIn("frank.ho@mcgill.ca", "Admin!2026");
 
         assertEquals(Role.FACILITY_ADMINISTRATOR, session.role());
+    }
+
+    @Test
+    void staffLogInStartsAnActiveSessionWithTheStaffAccountAndRole() {
+        Account staff = service.createAccount("Gina Park", "gina.park@mcgill.ca", "Staff!2026");
+
+        Session session = service.logIn("gina.park@mcgill.ca", "Staff!2026");
+
+        assertSame(staff, session.account());
+        assertEquals(new User("Gina Park"), session.user());
+        assertEquals(Role.STAFF, session.role());
+        assertSame(session, service.getActiveSession().orElseThrow());
+        assertTrue(service.isLoggedIn(staff.getUser()));
+        assertFalse(service.isLoggedIn(ALICE));
+        assertFalse(service.isLoggedIn(FRANK));
+    }
+
+    @Test
+    void loggingInAgainAsTheSameAccountStartsANewActiveSession() {
+        Session firstSession = service.logIn("alice.chen@mail.mcgill.ca", "Racket!2026");
+
+        Session nextSession = service.logIn("alice.chen@mail.mcgill.ca", "Racket!2026");
+
+        assertNotSame(firstSession, nextSession);
+        assertSame(alice, nextSession.account());
+        assertEquals(ALICE, nextSession.user());
+        assertEquals(Role.STUDENT, nextSession.role());
+        assertSame(nextSession, service.getActiveSession().orElseThrow());
+        assertTrue(service.isLoggedIn(ALICE));
     }
 
     @Test
@@ -124,6 +157,54 @@ class AccountServiceLogInTest {
 
         assertSame(frankSession, service.getActiveSession().orElseThrow());
         assertFalse(service.isLoggedIn(ALICE));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidCredentials")
+    void invalidCredentialsPreserveTheActiveSessionAndRole(String email, String password) {
+        Session frankSession = service.logIn("frank.ho@mcgill.ca", "Admin!2026");
+
+        InvalidAccountException e = assertThrows(InvalidAccountException.class,
+                () -> service.logIn(email, password));
+
+        assertEquals("Invalid email address or password", e.getMessage());
+        Session activeSession = service.getActiveSession().orElseThrow();
+        assertSame(frankSession, activeSession);
+        assertSame(frank, activeSession.account());
+        assertEquals(FRANK, activeSession.user());
+        assertEquals(Role.FACILITY_ADMINISTRATOR, activeSession.role());
+        assertTrue(service.isLoggedIn(FRANK));
+        assertFalse(service.isLoggedIn(ALICE));
+    }
+
+    private static Stream<Arguments> invalidCredentials() {
+        return Stream.of(
+                Arguments.of("dan.lee@mail.mcgill.ca", "Racket!2026"),
+                Arguments.of(null, "Racket!2026"),
+                Arguments.of("", "Racket!2026"),
+                Arguments.of("   ", "Racket!2026"),
+                Arguments.of("alice.chen@mail.mcgill.ca", null),
+                Arguments.of("alice.chen@mail.mcgill.ca", ""),
+                Arguments.of("alice.chen@mail.mcgill.ca", "   "));
+    }
+
+    @Test
+    void successfulLogInAfterARejectedAttemptReplacesThePreviousSession() {
+        Session frankSession = service.logIn("frank.ho@mcgill.ca", "Admin!2026");
+        InvalidAccountException e = assertThrows(InvalidAccountException.class,
+                () -> service.logIn("alice.chen@mail.mcgill.ca", "WrongPass1"));
+        assertEquals("Invalid email address or password", e.getMessage());
+        assertSame(frankSession, service.getActiveSession().orElseThrow());
+
+        Session aliceSession = service.logIn("alice.chen@mail.mcgill.ca", "Racket!2026");
+
+        assertNotSame(frankSession, aliceSession);
+        assertSame(aliceSession, service.getActiveSession().orElseThrow());
+        assertSame(alice, aliceSession.account());
+        assertEquals(ALICE, aliceSession.user());
+        assertEquals(Role.STUDENT, aliceSession.role());
+        assertTrue(service.isLoggedIn(ALICE));
+        assertFalse(service.isLoggedIn(FRANK));
     }
 
     @Test
