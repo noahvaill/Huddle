@@ -20,6 +20,7 @@ public class AccountService {
 
     public static final String ACCOUNT_CREATED_MESSAGE = "Account created";
     public static final String LOGGED_IN_MESSAGE_FORMAT = "Welcome back, %s";   // user name
+    public static final String PASSWORD_RESET_MESSAGE = "Your password has been reset";
     private static final String STUDENT_EMAIL_DOMAIN = "@mail.mcgill.ca";
     private static final String STAFF_EMAIL_DOMAIN = "@mcgill.ca";
 
@@ -129,6 +130,26 @@ public class AccountService {
     /** The reset link with this token; empty if there is none. */
     public Optional<PasswordResetLink> findResetLink(String token) {
         return Optional.ofNullable(token == null ? null : resetLinksByToken.get(token));
+    }
+
+    /**
+     * Sets a new password with a password reset link (ID011) and marks the link Used. Returns the account.
+     * An unknown, expired or already used link gives INVALID_RESET_LINK_MESSAGE, and nothing changes.
+     */
+    public Account resetPassword(String token, String newPassword) {
+        Objects.requireNonNull(newPassword, "Password is required");
+        if (newPassword.isEmpty()) {
+            throw new IllegalArgumentException("Password must not be empty");
+        }
+        PasswordResetLink link = findResetLink(token)
+                .orElseThrow(() -> new InvalidAccountException(InvalidAccountException.INVALID_RESET_LINK_MESSAGE));
+        if (link.isUsed() || link.isExpiredAt(currentDateTime())) {
+            throw new InvalidAccountException(InvalidAccountException.INVALID_RESET_LINK_MESSAGE);
+        }
+        Account account = link.getAccount();
+        account.changePassword(newPassword);
+        link.markUsed();
+        return account;
     }
 
     /** The current date and time, used to check whether a reset link has expired (ID011). */
