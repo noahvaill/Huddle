@@ -19,6 +19,7 @@ import java.util.Optional;
 public class AccountService {
 
     public static final String ACCOUNT_CREATED_MESSAGE = "Account created";
+    public static final String PROFILE_UPDATED_MESSAGE = "Profile updated";
     public static final String LOGGED_IN_MESSAGE_FORMAT = "Welcome back, %s";   // user name
     public static final String PASSWORD_RESET_MESSAGE = "Your password has been reset";
     private static final String STUDENT_EMAIL_DOMAIN = "@mail.mcgill.ca";
@@ -112,6 +113,18 @@ public class AccountService {
     /** The message issued when an account logs in, e.g. "Welcome back, Alice Chen". */
     public static String loggedInMessage(Account account) {
         return String.format(LOGGED_IN_MESSAGE_FORMAT, account.getName());
+    }
+
+    /**
+     * Changes the name of this user's account (ID013, TID041) and returns the account; the email, role, password and
+     * any active session are kept, and the session shows the new name. Fails if the user has no account.
+     * A blank name is rejected and the name is kept (the "Name cannot be empty" error is TID043).
+     */
+    public Account changeName(User user, String newName) {
+        Account account = findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("No account for " + user));
+        account.changeName(newName);
+        return account;
     }
 
     /** All accounts, in the order they were added. */
