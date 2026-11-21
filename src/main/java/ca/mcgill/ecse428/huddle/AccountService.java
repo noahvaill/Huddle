@@ -1,6 +1,7 @@
 package ca.mcgill.ecse428.huddle;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The registry of Huddle accounts, one per email address (ID001).
@@ -21,6 +23,11 @@ public class AccountService {
     public static final String ACCOUNT_CREATED_MESSAGE = "Account created";
     public static final String LOGGED_IN_MESSAGE_FORMAT = "Welcome back, %s";   // user name
     public static final String PASSWORD_RESET_MESSAGE = "Your password has been reset";
+    /** Issued for every reset request, so the message does not reveal which addresses have an account (TID024). */
+    public static final String RESET_LINK_SENT_MESSAGE =
+            "If an account exists for this email address, a password reset link has been sent";
+    /** How long a requested reset link stays valid (ID011). */
+    public static final Duration RESET_LINK_VALIDITY = Duration.ofHours(1);
     private static final String STUDENT_EMAIL_DOMAIN = "@mail.mcgill.ca";
     private static final String STAFF_EMAIL_DOMAIN = "@mcgill.ca";
 
@@ -125,6 +132,21 @@ public class AccountService {
         if (resetLinksByToken.putIfAbsent(link.getToken(), link) != null) {
             throw new IllegalArgumentException("A reset link already exists with this token");
         }
+    }
+
+    /**
+     * Requests a password reset link (ID011, TID024). For an email with an account, in any case and with surrounding
+     * spaces, a new link that expires RESET_LINK_VALIDITY from now is added and returned (it would be emailed).
+     * An unknown email gets no link but the caller issues the same RESET_LINK_SENT_MESSAGE, so the response does not
+     * reveal which addresses have an account.
+     */
+    public Optional<PasswordResetLink> requestResetLink(String email) {
+        return findByEmail(email).map(account -> {
+            PasswordResetLink link = new PasswordResetLink(
+                    UUID.randomUUID().toString(), account, currentDateTime().plus(RESET_LINK_VALIDITY));
+            addResetLink(link);
+            return link;
+        });
     }
 
     /** The reset link with this token; empty if there is none. */
