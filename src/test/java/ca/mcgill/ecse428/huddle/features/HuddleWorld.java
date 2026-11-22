@@ -1,6 +1,7 @@
 package ca.mcgill.ecse428.huddle.features;
 
 import ca.mcgill.ecse428.huddle.AccountService;
+import ca.mcgill.ecse428.huddle.FacilityService;
 import ca.mcgill.ecse428.huddle.GameRequestService;
 import ca.mcgill.ecse428.huddle.TimeSlot;
 import ca.mcgill.ecse428.huddle.TimeSlotService;
@@ -16,6 +17,7 @@ import java.util.Map;
 public class HuddleWorld {
 
     public AccountService accountService = new AccountService();
+    public FacilityService facilityService = new FacilityService();
     public TimeSlotService timeSlotService = new TimeSlotService();
     public GameRequestService gameRequestService = new GameRequestService();
     public Map<String, TimeSlot> timeSlotsById = new HashMap<>();

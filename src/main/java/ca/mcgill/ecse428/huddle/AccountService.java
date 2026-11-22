@@ -23,6 +23,9 @@ public class AccountService {
     public static final String ACCOUNT_CREATED_MESSAGE = "Account created";
     public static final String PROFILE_UPDATED_MESSAGE = "Profile updated";
     public static final String LOGGED_IN_MESSAGE_FORMAT = "Welcome back, %s";   // user name
+    public static final String LOGGED_OUT_MESSAGE = "You have been logged out";
+    /** The device used when a log in does not name one (ID002). */
+    public static final String DEFAULT_DEVICE = "Default device";
     public static final String PASSWORD_RESET_MESSAGE = "Your password has been reset";
     /** Issued for every reset request, so the message does not reveal which addresses have an account (TID024). */
     public static final String RESET_LINK_SENT_MESSAGE =
@@ -35,7 +38,8 @@ public class AccountService {
     private final Map<String, Account> accountsByEmail = new LinkedHashMap<>();
     private final Map<String, PasswordResetLink> resetLinksByToken = new HashMap<>();
     private Clock clock = Clock.systemDefaultZone();
-    private Session activeSession;
+    /** The active session on each device (ID012), in the order they were started. */
+    private final Map<String, Session> sessionsByDevice = new LinkedHashMap<>();
 
     /**
      * Creates an account for a McGill student or staff member (ID001) and returns it.
@@ -92,29 +96,65 @@ public class AccountService {
         return accountsByEmail.values().stream().filter(a -> a.getUser().equals(user)).findFirst();
     }
 
-    /**
-     * Logs in with an email address and password (ID002, TID009) and returns the new active session, which carries
-     * the account's role. The email is matched in any case and with surrounding spaces; the password must match
-     * exactly. Logging in replaces any session that was active.
-     * A wrong password and an unknown email give the same error (TID010), so the error does not reveal which
-     * addresses have an account, and the active session is left unchanged.
-     */
+    /** Logs in on DEFAULT_DEVICE (ID002); see {@link #logIn(String, String, String)}. */
     public Session logIn(String email, String password) {
+        return logIn(email, password, DEFAULT_DEVICE);
+    }
+
+    /**
+     * Logs in on a device with an email address and password (ID002, TID009) and returns the new active session,
+     * which carries the account's role. The email is matched in any case and with surrounding spaces; the password
+     * must match exactly. A device has one session, so logging in replaces any session that was active on it; the
+     * sessions on other devices are kept (ID012, TID033).
+     * A wrong password and an unknown email give the same error (TID010), so the error does not reveal which
+     * addresses have an account, and the active sessions are left unchanged.
+     */
+    public Session logIn(String email, String password, String device) {
+        requireDevice(device);
         Account account = findByEmail(email)
                 .filter(a -> a.passwordMatches(password))
                 .orElseThrow(() -> new InvalidAccountException(InvalidAccountException.INVALID_CREDENTIALS_MESSAGE));
-        activeSession = new Session(account);
-        return activeSession;
+        Session session = new Session(account);
+        sessionsByDevice.remove(device); // so the new session goes last, see getActiveSession
+        sessionsByDevice.put(device, session);
+        return session;
     }
 
-    /** The session started by the last successful log in; empty if nobody has logged in. */
+    /**
+     * Logs out on one device (ID012, TID033): ends the session on this device and keeps the sessions on other
+     * devices, including the same account's. Nothing changes if the device has no active session (the
+     * "You are not logged in" error is TID034).
+     */
+    public void logOut(String device) {
+        requireDevice(device);
+        sessionsByDevice.remove(device);
+    }
+
+    private static void requireDevice(String device) {
+        Objects.requireNonNull(device, "Device is required");
+        if (device.isBlank()) {
+            throw new IllegalArgumentException("Device must not be blank");
+        }
+    }
+
+    /** The most recently started session that is still active, on any device; empty if nobody is logged in. */
     public Optional<Session> getActiveSession() {
-        return Optional.ofNullable(activeSession);
+        return sessionsByDevice.values().stream().reduce((earlier, later) -> later);
     }
 
-    /** Whether this user has the active session, for steps like "Alice Chen" is logged in to Huddle. */
+    /** The active session on this device; empty if nobody is logged in on it. */
+    public Optional<Session> getActiveSession(String device) {
+        return Optional.ofNullable(sessionsByDevice.get(device));
+    }
+
+    /** Whether this user has an active session on any device, for steps like "Alice Chen" is logged in to Huddle. */
     public boolean isLoggedIn(User user) {
-        return activeSession != null && activeSession.user().equals(user);
+        return sessionsByDevice.values().stream().anyMatch(s -> s.user().equals(user));
+    }
+
+    /** Whether this user has the active session on this device. */
+    public boolean isLoggedIn(User user, String device) {
+        return getActiveSession(device).filter(s -> s.user().equals(user)).isPresent();
     }
 
     /** The message issued when an account logs in, e.g. "Welcome back, Alice Chen". */
@@ -125,11 +165,15 @@ public class AccountService {
     /**
      * Changes the name of this user's account (ID013, TID041) and returns the account; the email, role, password and
      * any active session are kept, and the session shows the new name. Fails if the user has no account.
-     * A blank name is rejected and the name is kept (the "Name cannot be empty" error is TID043).
+     * A blank name gives NAME_EMPTY_MESSAGE and the name is kept.
      */
     public Account changeName(User user, String newName) {
         Account account = findByUser(user)
                 .orElseThrow(() -> new IllegalArgumentException("No account for " + user));
+        Objects.requireNonNull(newName, "Name is required");
+        if (newName.isBlank()) {
+            throw new InvalidAccountException(InvalidAccountException.NAME_EMPTY_MESSAGE);
+        }
         account.changeName(newName);
         return account;
     }
