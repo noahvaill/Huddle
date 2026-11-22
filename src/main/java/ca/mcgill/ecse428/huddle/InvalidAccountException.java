@@ -11,6 +11,7 @@ public class InvalidAccountException extends RuntimeException {
     public static final String INVALID_RESET_LINK_MESSAGE = "This password reset link is invalid or has expired";
     public static final String NOT_LOGGED_IN_MESSAGE = "You are not logged in";
     public static final String CURRENT_PASSWORD_INCORRECT_MESSAGE = "Current password is incorrect";
+    public static final String NAME_EMPTY_MESSAGE = "Name cannot be empty";
 
     public InvalidAccountException(String message) {
         super(message);

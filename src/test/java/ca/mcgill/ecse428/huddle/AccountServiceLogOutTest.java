@@ -12,7 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Unit tests for logging out, AccountService.logOut (ID012, TID033-TID034 and TID036). */
+/** Unit tests for logging out, AccountService.logOut (ID012, TID033-TID034). */
 class AccountServiceLogOutTest {
 
     private static final User ALICE = new User("Alice Chen");
@@ -185,6 +185,13 @@ class AccountServiceLogOutTest {
         assertLogOutIsRejected("Laptop");
     }
 
+    @Test
+    void loggedOutMessageMatchesTheFeatureFile() {
+        assertEquals("You have been logged out", AccountService.LOGGED_OUT_MESSAGE);
+    }
+
+    // More log out rules (TID036)
+
     @ParameterizedTest
     @EnumSource(Role.class)
     void accountsWithAnyRoleCanLogOut(Role role) {
@@ -276,10 +283,5 @@ class AccountServiceLogOutTest {
 
         assertTrue(service.getActiveSession("Laptop").isEmpty());
         assertSame(otherAlice, service.getActiveSession("Phone").orElseThrow().account());
-    }
-
-    @Test
-    void loggedOutMessageMatchesTheFeatureFile() {
-        assertEquals("You have been logged out", AccountService.LOGGED_OUT_MESSAGE);
     }
 }
