@@ -61,7 +61,9 @@ class AccountServiceChangeNameTest {
 
     @Test
     void blankNameIsRejectedAndTheNameIsKept() {
-        assertThrows(IllegalArgumentException.class, () -> service.changeName(new User("Alice Chen"), "  "));
+        InvalidAccountException blank = assertThrows(InvalidAccountException.class,
+                () -> service.changeName(new User("Alice Chen"), "  "));
+        assertEquals(InvalidAccountException.NAME_EMPTY_MESSAGE, blank.getMessage());
         assertThrows(NullPointerException.class, () -> service.changeName(new User("Alice Chen"), null));
         assertEquals("Alice Chen", alice.getName());
     }

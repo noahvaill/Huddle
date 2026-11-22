@@ -167,11 +167,15 @@ public class AccountService {
     /**
      * Changes the name of this user's account (ID013, TID041) and returns the account; the email, role, password and
      * any active session are kept, and the session shows the new name. Fails if the user has no account.
-     * A blank name is rejected and the name is kept (the "Name cannot be empty" error is TID043).
+     * A blank name gives NAME_EMPTY_MESSAGE and the name is kept.
      */
     public Account changeName(User user, String newName) {
         Account account = findByUser(user)
                 .orElseThrow(() -> new IllegalArgumentException("No account for " + user));
+        Objects.requireNonNull(newName, "Name is required");
+        if (newName.isBlank()) {
+            throw new InvalidAccountException(InvalidAccountException.NAME_EMPTY_MESSAGE);
+        }
         account.changeName(newName);
         return account;
     }
