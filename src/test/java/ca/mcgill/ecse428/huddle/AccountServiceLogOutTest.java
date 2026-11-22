@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Unit tests for logging out, AccountService.logOut (ID012, TID033-TID034). */
@@ -187,5 +188,100 @@ class AccountServiceLogOutTest {
     @Test
     void loggedOutMessageMatchesTheFeatureFile() {
         assertEquals("You have been logged out", AccountService.LOGGED_OUT_MESSAGE);
+    }
+
+    // More log out rules (TID036)
+
+    @ParameterizedTest
+    @EnumSource(Role.class)
+    void accountsWithAnyRoleCanLogOut(Role role) {
+        User user = new User("Gina Park");
+        service.addAccount(new Account(user, "gina.park@mcgill.ca", "Staff!2026", role));
+        service.logIn("gina.park@mcgill.ca", "Staff!2026");
+
+        service.logOut(AccountService.DEFAULT_DEVICE);
+
+        assertFalse(service.isLoggedIn(user));
+        assertTrue(service.getActiveSession().isEmpty());
+    }
+
+    @Test
+    void loggingOutKeepsTheAccount() {
+        Account alice = logInAlice("Laptop").account();
+
+        service.logOut("Laptop");
+
+        assertSame(alice, service.findByEmail("alice.chen@mail.mcgill.ca").orElseThrow());
+        assertEquals(2, service.getAccounts().size());
+        assertEquals(Role.STUDENT, alice.getRole());
+        assertTrue(alice.passwordMatches("Racket!2026"));
+    }
+
+    @Test
+    void anotherUserCanLogInOnTheDeviceAfterALogOut() {
+        logInAlice("Laptop");
+        service.logOut("Laptop");
+
+        Session frank = logInFrank("Laptop");
+
+        assertSame(frank, service.getActiveSession("Laptop").orElseThrow());
+        assertEquals(Role.FACILITY_ADMINISTRATOR, frank.role());
+        assertFalse(service.isLoggedIn(ALICE));
+    }
+
+    @Test
+    void rejectedLogOutDoesNotPreventALaterLogInAndLogOut() {
+        assertLogOutIsRejected("Laptop");
+
+        logInAlice("Laptop");
+        assertTrue(service.isLoggedIn(ALICE, "Laptop"));
+        service.logOut("Laptop");
+
+        assertFalse(service.isLoggedIn(ALICE, "Laptop"));
+    }
+
+    @Test
+    void loggingInAgainOnADeviceNeedsOnlyOneLogOut() {
+        logInAlice("Laptop");
+        logInAlice("Laptop");
+
+        service.logOut("Laptop");
+
+        assertFalse(service.isLoggedIn(ALICE));
+        assertLogOutIsRejected("Laptop");
+    }
+
+    @Test
+    void failedLogInAfterALogOutDoesNotRestoreTheSession() {
+        logInAlice("Laptop");
+        service.logOut("Laptop");
+
+        assertThrows(InvalidAccountException.class,
+                () -> service.logIn("alice.chen@mail.mcgill.ca", "WrongPass1", "Laptop"));
+
+        assertFalse(service.isLoggedIn(ALICE));
+        assertTrue(service.getActiveSession("Laptop").isEmpty());
+    }
+
+    @Test
+    void userCanLogOutAfterChangingPassword() {
+        logInAlice("Laptop");
+        service.changePassword("alice.chen@mail.mcgill.ca", "Racket!2026", "Smash!2027");
+
+        service.logOut("Laptop");
+
+        assertFalse(service.isLoggedIn(ALICE));
+    }
+
+    @Test
+    void loggingOutOneOfTwoAccountsWithTheSameNameKeepsTheOthersSession() {
+        Account otherAlice = service.createAccount("Alice Chen", "alice.chen2@mail.mcgill.ca", "Other!2026");
+        logInAlice("Laptop");
+        service.logIn("alice.chen2@mail.mcgill.ca", "Other!2026", "Phone");
+
+        service.logOut("Laptop");
+
+        assertTrue(service.getActiveSession("Laptop").isEmpty());
+        assertSame(otherAlice, service.getActiveSession("Phone").orElseThrow().account());
     }
 }
