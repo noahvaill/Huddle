@@ -134,6 +134,22 @@ public class AccountService {
         return account;
     }
 
+    /**
+     * Changes the password of this user's account after checking the current one (ID013, TID042) and returns the
+     * account; the name, email, role and any active session are kept. Fails if the user has no account.
+     * A wrong current password is rejected and the password is kept (the "Current password is incorrect" error
+     * is TID043). The new password follows the same rules as a new account's password.
+     */
+    public Account changePassword(User user, String currentPassword, String newPassword) {
+        Account account = findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("No account for " + user));
+        if (!account.passwordMatches(currentPassword)) {
+            throw new IllegalArgumentException("Current password does not match");
+        }
+        account.changePassword(newPassword);
+        return account;
+    }
+
     /** All accounts, in the order they were added. */
     public List<Account> getAccounts() {
         return List.copyOf(accountsByEmail.values());
