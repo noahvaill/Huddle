@@ -122,12 +122,14 @@ public class AccountService {
 
     /**
      * Logs out on one device (ID012, TID033): ends the session on this device and keeps the sessions on other
-     * devices, including the same account's. Nothing changes if the device has no active session (the
-     * "You are not logged in" error is TID034).
+     * devices, including the same account's. A device with no active session gives NOT_LOGGED_IN_MESSAGE (TID034),
+     * and nothing changes.
      */
     public void logOut(String device) {
         requireDevice(device);
-        sessionsByDevice.remove(device);
+        if (sessionsByDevice.remove(device) == null) {
+            throw new InvalidAccountException(InvalidAccountException.NOT_LOGGED_IN_MESSAGE);
+        }
     }
 
     private static void requireDevice(String device) {

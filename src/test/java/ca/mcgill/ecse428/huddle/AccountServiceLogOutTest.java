@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Unit tests for logging out on one device, AccountService.logOut (ID012, TID033). */
+/** Unit tests for logging out, AccountService.logOut (ID012, TID033-TID034). */
 class AccountServiceLogOutTest {
 
     private static final User ALICE = new User("Alice Chen");
@@ -144,6 +144,44 @@ class AccountServiceLogOutTest {
     void missingDeviceIsRejected() {
         assertThrows(NullPointerException.class, () -> logInAlice(null));
         assertThrows(NullPointerException.class, () -> service.logOut(null));
+    }
+
+    private void assertLogOutIsRejected(String device) {
+        InvalidAccountException e = assertThrows(InvalidAccountException.class, () -> service.logOut(device));
+        assertEquals("You are not logged in", e.getMessage());
+    }
+
+    @Test
+    void loggingOutWithoutAnActiveSessionIsRejected() {
+        assertLogOutIsRejected(AccountService.DEFAULT_DEVICE);
+
+        assertTrue(service.getActiveSession().isEmpty());
+    }
+
+    @Test
+    void loggingOutTwiceIsRejectedTheSecondTime() {
+        logInAlice("Laptop");
+        service.logOut("Laptop");
+
+        assertLogOutIsRejected("Laptop");
+    }
+
+    @Test
+    void loggingOutOnADeviceWithoutASessionIsRejectedAndKeepsTheOtherDevicesSession() {
+        Session phone = logInAlice("Phone");
+
+        assertLogOutIsRejected("Laptop");
+
+        assertSame(phone, service.getActiveSession("Phone").orElseThrow());
+        assertTrue(service.isLoggedIn(ALICE));
+    }
+
+    @Test
+    void loggingOutAfterAFailedLogInIsRejected() {
+        assertThrows(InvalidAccountException.class,
+                () -> service.logIn("alice.chen@mail.mcgill.ca", "WrongPass1", "Laptop"));
+
+        assertLogOutIsRejected("Laptop");
     }
 
     @Test
