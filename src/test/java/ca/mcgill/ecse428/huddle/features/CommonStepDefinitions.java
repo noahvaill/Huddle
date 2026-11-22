@@ -31,6 +31,12 @@ public class CommonStepDefinitions {
     @Given("{string} is logged in to Huddle")
     public void is_logged_in_to_huddle(String userName) {
         world.loggedInUser = userName;
+        String password = world.accountPasswordsByName.get(userName);
+        if (password != null) {
+            var account = world.accountService.findByUser(new User(userName))
+                    .orElseThrow(() -> new AssertionError("No account for " + userName));
+            world.accountService.logIn(account.getEmail(), password);
+        }
     }
 
     /** Test hook (TID027): fixes "now", e.g. "2026-11-20 18:00", so link expiry does not depend on the real clock. */
