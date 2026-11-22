@@ -30,6 +30,7 @@ public class CreateAccountStepDefinitions {
     @Given("the following accounts exist in Huddle:")
     public void the_following_accounts_exist_in_huddle(DataTable dataTable) {
         for (Map<String, String> row : dataTable.asMaps()) {
+            world.accountPasswordsByName.put(row.get("name"), row.get("password"));
             world.accountService.addAccount(new Account(
                     new User(row.get("name")),
                     row.get("email"),

@@ -19,6 +19,7 @@ public class HuddleWorld {
     public TimeSlotService timeSlotService = new TimeSlotService();
     public GameRequestService gameRequestService = new GameRequestService();
     public Map<String, TimeSlot> timeSlotsById = new HashMap<>();
+    public Map<String, String> accountPasswordsByName = new HashMap<>();
     public String loggedInUser;
     public List<String> messages = new ArrayList<>(); // a join that fills the last spot issues two messages (ID010)
     public String errorMessage;
