@@ -1,6 +1,6 @@
 # Huddle Domain Model
 
-This is the domain model for the Sprint A stories (ID004, ID005, ID006, ID007, ID008, ID009 and ID010) and the Sprint B account stories (ID001 Create Account, ID002 Log In, ID011 Reset Password). It is based on the scenarios in our feature files and will be updated during the sprint if needed.
+This is the domain model for the Sprint A stories (ID004, ID005, ID006, ID007, ID008, ID009 and ID010) and the Sprint B account stories (ID001 Create Account, ID002 Log In, ID011 Reset Password, ID012 Log Out). It is based on the scenarios in our feature files and will be updated during the sprint if needed.
 
 
 ```mermaid
@@ -31,7 +31,9 @@ classDiagram
         password : String
         role : Role
     }
-    class Session
+    class Session {
+        device : String
+    }
     class PasswordResetLink {
         token : String
         expiresAt : DateTime
@@ -68,7 +70,7 @@ classDiagram
     Account "0..1 bookedBy" -- "0..*" TimeSlot : books
     TimeSlot "1" -- "0..*" GameRequest : is for
     User "1" -- "0..1" Account : has
-    Account "1" -- "0..1" Session : is logged in with
+    Account "1" -- "0..*" Session : is logged in with
     Account "1" -- "0..*" PasswordResetLink : is reset with
     User "1 recipient" -- "0..* notifications" Notification
     User "1 creator" -- "0..* createdRequests" GameRequest
@@ -89,7 +91,7 @@ Association names read: a Court *is for* a Sport, a Court *has* TimeSlots, an Ac
 - **User**: a Huddle user, identified by name. A user can create game requests and join other users' game requests, and receives notifications.
 - **Account**: the registered account of a user (ID001). The email is a McGill address (@mail.mcgill.ca for students, @mcgill.ca for staff), unique in any case. The password can be changed with a reset link (ID011), or by the account holder after giving the current password (ID013). The name can also be changed (ID013); since two accounts can have the same name, an account is identified by its email.
 - **Role**: what an account can do. A new @mail.mcgill.ca account is a Student and a new @mcgill.ca account is Staff. A Facility Administrator can book time slots directly and publish time slots (ID003).
-- **Session**: the active session started when an account logs in with its email and password (ID002). It carries the account's role. Logging in again replaces it.
+- **Session**: the active session started when an account logs in with its email and password (ID002). It carries the account's role. An account can be logged in on several devices, with one session per device. Logging in again on the same device replaces its session, and logging out on a device ends only that device's session (ID012).
 - **PasswordResetLink**: a link sent by email to reset an account's password (ID011). It expires at expiresAt and can be used only once, after which it is Used. A request for an email without an account creates no link, but gives the same message.
 - **Notification**: a message sent to a user, e.g. when their game is cancelled because its time slot was booked, or when the creator cancels a game they joined.
 - **TimeSlotStatus**: Available, or Booked once a game is confirmed or an administrator books the slot. A Booked slot goes back to Available when its confirmed game is cancelled.
