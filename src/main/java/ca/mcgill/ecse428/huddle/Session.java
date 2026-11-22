@@ -2,7 +2,10 @@ package ca.mcgill.ecse428.huddle;
 
 import java.util.Objects;
 
-/** The active session started when an account logs in (ID002): who is logged in and with which role. */
+/**
+ * The active session started when an account logs in on a device (ID002): who is logged in and with which role.
+ * It ends when they log out on that device (ID012).
+ */
 public record Session(Account account) {
 
     public Session {
