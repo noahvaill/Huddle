@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 public final class Account {
 
-    private final User user;
+    private User user;
     private final String email;
     private String password;
     private final Role role;
@@ -47,6 +47,14 @@ public final class Account {
     }
 
     /** Replaces the password (ID011), with the same rules as a new account's password. */
+    /**
+     * Changes the account's name (ID013): the account now belongs to the user with the new name, stripped.
+     * A missing or blank name is rejected by User and the name is kept.
+     */
+    public void changeName(String newName) {
+        this.user = new User(newName);
+    }
+
     public void changePassword(String newPassword) {
         Objects.requireNonNull(newPassword, "Password is required");
         if (newPassword.isEmpty()) {
