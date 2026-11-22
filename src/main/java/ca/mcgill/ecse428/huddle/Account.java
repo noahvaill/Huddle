@@ -46,7 +46,6 @@ public final class Account {
         return password.equals(candidate);
     }
 
-    /** Replaces the password (ID011), with the same rules as a new account's password. */
     /**
      * Changes the account's name (ID013): the account now belongs to the user with the new name, stripped.
      * A missing or blank name is rejected by User and the name is kept.
@@ -55,6 +54,7 @@ public final class Account {
         this.user = new User(newName);
     }
 
+    /** Replaces the password (ID011, ID013), with the same rules as a new account's password. */
     public void changePassword(String newPassword) {
         Objects.requireNonNull(newPassword, "Password is required");
         if (newPassword.isEmpty()) {

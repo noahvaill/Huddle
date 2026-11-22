@@ -87,7 +87,7 @@ Association names read: a Court *is for* a Sport, a Court *has* TimeSlots, an Ac
 - **TimeSlot**: a period on a court. Its status is Available or Booked.
 - **GameRequest**: a game posted by a user for a time slot. groupSize is the number of players the creator brings and spotsRemaining is how many more players are needed.
 - **User**: a Huddle user, identified by name. A user can create game requests and join other users' game requests, and receives notifications.
-- **Account**: the registered account of a user (ID001). The email is a McGill address (@mail.mcgill.ca for students, @mcgill.ca for staff), unique in any case. The password can be changed with a reset link (ID011).
+- **Account**: the registered account of a user (ID001). The email is a McGill address (@mail.mcgill.ca for students, @mcgill.ca for staff), unique in any case. The password can be changed with a reset link (ID011), or by the account holder after giving the current password (ID013). The name can also be changed (ID013); since two accounts can have the same name, an account is identified by its email.
 - **Role**: what an account can do. A new @mail.mcgill.ca account is a Student and a new @mcgill.ca account is Staff. A Facility Administrator can book time slots directly and publish time slots (ID003).
 - **Session**: the active session started when an account logs in with its email and password (ID002). It carries the account's role. Logging in again replaces it.
 - **PasswordResetLink**: a link sent by email to reset an account's password (ID011). It expires at expiresAt and can be used only once, after which it is Used. A request for an email without an account creates no link, but gives the same message.
