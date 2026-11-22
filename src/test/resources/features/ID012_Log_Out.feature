@@ -31,7 +31,6 @@ Scenario: Log out on one device while logged in on another device (Alternate Flo
   And "Alice Chen" has an active session in Huddle on device "Phone"
   And the confirmation message "You have been logged out" is issued
 
-@wip
 Scenario: Attempt to log out without an active session (Error Flow)
   Given no active session exists in Huddle
   When a user attempts to log out
