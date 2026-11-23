@@ -1,4 +1,4 @@
-@ID013 @wip
+@ID013
 Feature: Edit Profile
 
 As a registered Huddle user
