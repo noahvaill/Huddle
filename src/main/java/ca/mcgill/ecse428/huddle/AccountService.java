@@ -22,6 +22,7 @@ public class AccountService {
 
     public static final String ACCOUNT_CREATED_MESSAGE = "Account created";
     public static final String PROFILE_UPDATED_MESSAGE = "Profile updated";
+    public static final String SKILL_LEVEL_SAVED_MESSAGE = "Skill level saved";
     public static final String LOGGED_IN_MESSAGE_FORMAT = "Welcome back, %s";   // user name
     public static final String LOGGED_OUT_MESSAGE = "You have been logged out";
     /** The device used when a log in does not name one (ID002). */
@@ -194,6 +195,27 @@ public class AccountService {
             throw new InvalidAccountException(InvalidAccountException.CURRENT_PASSWORD_INCORRECT_MESSAGE);
         }
         account.changePassword(newPassword);
+        return account;
+    }
+
+    /**
+     * Sets this user's skill level for a sport (ID014, TID049), or changes it if the sport already has one, and
+     * returns the account; the levels of the other sports are kept. The sport and level names are matched in any case
+     * and with surrounding spaces. Fails if the user has no account.
+     * A sport that is not offered gives SportNotOfferedException ("Sport not offered") and a level that is not offered
+     * gives SKILL_LEVEL_NOT_OFFERED_MESSAGE (TID050); either way the skill levels are unchanged.
+     */
+    public Account setSkillLevel(User user, String sportName, String levelName) {
+        Account account = findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("No account for " + user));
+        Sport sport = Sport.fromName(sportName);
+        SkillLevel level;
+        try {
+            level = SkillLevel.fromName(levelName);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidAccountException(InvalidAccountException.SKILL_LEVEL_NOT_OFFERED_MESSAGE);
+        }
+        account.setSkillLevel(sport, level);
         return account;
     }
 
