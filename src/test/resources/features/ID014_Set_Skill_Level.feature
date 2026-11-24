@@ -1,4 +1,4 @@
-@ID014 @wip
+@ID014
 Feature: Set Skill Level
 
 As a Huddle user who plays sports
